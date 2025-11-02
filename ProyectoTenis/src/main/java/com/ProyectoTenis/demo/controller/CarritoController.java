@@ -10,6 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
+import com.ProyectoTenis.demo.repository.ClienteRepository;
+import com.ProyectoTenis.demo.repository.TenisRepository;
 
 @Controller
 @RequestMapping("/carrito")
@@ -19,36 +22,52 @@ public class CarritoController {
     private CarritoService carritoService;
 
     @Autowired
-    private CarritoDetalleService carritoDetalleService;
+    private ClienteRepository clienteRepository;
 
     @Autowired
-    private TenisService tenisService;
+    private TenisRepository tenisRepository;
 
-    @GetMapping
-    public String verCarrito(HttpSession session, Model model) {
-        var cliente = (Cliente) session.getAttribute("clienteLogueado");
-        var carrito = carritoService.getOrCreateCarrito(cliente);
-        var detalles = carritoDetalleService.getDetalles(carrito);
+    @Autowired
+    private CarritoDetalleRepository carritoDetalleRepository;
 
+    
+    @GetMapping("/{idCliente}")
+    public String mostrarCarrito(@PathVariable Long idCliente, Model model) {
+        Cliente cliente = clienteRepository.findById(idCliente).orElseThrow();
+        Carrito carrito = carritoService.getOrCreateCarrito(cliente);
+
+        model.addAttribute("cliente", cliente);
         model.addAttribute("carrito", carrito);
-        model.addAttribute("detalles", detalles);
-        return "/cliente/carrito";
+        model.addAttribute("detalles", carritoService.getDetalles(carrito));
+        return "carrito"; 
     }
 
-    @PostMapping("/agregar/{idTenis}")
-    public String agregar(@PathVariable Long idTenis, HttpSession session, RedirectAttributes redirect) {
-        var cliente = (Cliente) session.getAttribute("clienteLogueado");
-        var carrito = carritoService.getOrCreateCarrito(cliente);
+    
+    @PostMapping("/{idCliente}/agregar/{idTenis}")
+    public String agregarProducto(
+            @PathVariable Long idCliente,
+            @PathVariable Long idTenis) {
 
+        Cliente cliente = clienteRepository.findById(idCliente).orElseThrow();
+        Carrito carrito = carritoService.getOrCreateCarrito(cliente);
         carritoService.agregarProducto(carrito, idTenis);
-        redirect.addFlashAttribute("mensaje", "Producto agregado al carrito");
-        return "redirect:/carrito";
+
+        return "redirect:/carrito/" + idCliente;
     }
 
-    @GetMapping("/eliminar/{idDetalle}")
-    public String eliminar(@PathVariable Long idDetalle, RedirectAttributes redirect) {
-        carritoDetalleService.delete(idDetalle);
-        redirect.addFlashAttribute("mensaje", "Producto eliminado del carrito");
-        return "redirect:/carrito";
+    @PostMapping("/eliminar/{idDetalle}")
+    public String eliminarProducto(@PathVariable Long idDetalle) {
+        CarritoDetalle detalle = carritoDetalleRepository.findById(idDetalle).orElseThrow();
+        Long idCliente = detalle.getCarrito().getCliente().getIdCliente();
+
+        carritoService.eliminarProducto(detalle);
+        return "redirect:/carrito/" + idCliente;
+    }
+    
+    @PostMapping("/{idCliente}/confirmar")
+    public String confirmarCompra(@PathVariable Long idCliente) {
+        Cliente cliente = clienteRepository.findById(idCliente).orElseThrow();
+        carritoService.confirmarOrden(cliente);
+        return "redirect:/confirmacion"; 
     }
 }
