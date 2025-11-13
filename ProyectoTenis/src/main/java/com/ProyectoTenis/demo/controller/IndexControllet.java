@@ -4,13 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import practica.practica.domain.Categoria;
-import practica.practica.domain.Cliente;
-import practica.practica.domain.Tenis;
-import practica.practica.service.CategoriaService;
-import practica.practica.service.TenisService;
-import practica.practica.service.CarritoService;
-
+import com.ProyectoTenis.demo.domain.Categoria;
+import com.ProyectoTenis.demo.domain.Cliente;
+import com.ProyectoTenis.demo.domain.Tenis;
+import com.ProyectoTenis.demo.service.CategoriaService;
+import com.ProyectoTenis.demo.service.TenisService;
+import com.ProyectoTenis.demo.service.CarritoService;
 import java.util.List;
 import java.util.Optional;
 

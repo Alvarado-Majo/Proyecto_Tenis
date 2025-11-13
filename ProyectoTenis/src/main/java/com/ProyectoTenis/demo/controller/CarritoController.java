@@ -5,13 +5,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import practica.practica.domain.Carrito;
-import practica.practica.domain.CarritoDetalle;
-import practica.practica.domain.Cliente;
-import practica.practica.service.CarritoService;
-import practica.practica.service.CarritoDetalleService;
-import practica.practica.service.OrdenService;
-
+import com.ProyectoTenis.demo.domain.Carrito;
+import com.ProyectoTenis.demo.domain.CarritoDetalle;
+import com.ProyectoTenis.demo.domain.Cliente;
+import com.ProyectoTenis.demo.service.CarritoService;
+import com.ProyectoTenis.demo.service.CarritoDetalleService;
+import com.ProyectoTenis.demo.service.OrdenService;
 import java.math.BigDecimal;
 import java.util.List;
 

@@ -3,9 +3,8 @@ package com.ProyectoTenis.demo.service;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import practica.practica.domain.Categoria;
-import practica.practica.repository.CategoriaRepository;
-
+import com.ProyectoTenis.demo.domain.Categoria;
+import com.ProyectoTenis.demo.repository.CategoriaRepository;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;

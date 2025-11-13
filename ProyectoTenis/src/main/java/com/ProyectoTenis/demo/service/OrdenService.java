@@ -2,11 +2,10 @@ package com.ProyectoTenis.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import practica.practica.domain.*;
-import practica.practica.repository.CarritoDetalleRepository;
-import practica.practica.repository.OrdenDetalleRepository;
-import practica.practica.repository.OrdenRepository;
-
+import com.ProyectoTenis.demo.domain.*;
+import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
+import com.ProyectoTenis.demo.repository.OrdenDetalleRepository;
+import com.ProyectoTenis.demo.repository.OrdenRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

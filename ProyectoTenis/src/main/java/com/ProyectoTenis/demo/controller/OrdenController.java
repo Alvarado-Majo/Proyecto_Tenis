@@ -5,12 +5,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import practica.practica.domain.Cliente;
-import practica.practica.domain.Orden;
-import practica.practica.domain.OrdenDetalle;
-import practica.practica.service.OrdenService;
-import practica.practica.service.OrdenDetalleService;
-
+import com.ProyectoTenis.demo.domain.Cliente;
+import com.ProyectoTenis.demo.domain.Orden;
+import com.ProyectoTenis.demo.domain.OrdenDetalle;
+import com.ProyectoTenis.demo.service.OrdenService;
+import com.ProyectoTenis.demo.service.OrdenDetalleService;
 import java.math.BigDecimal;
 import java.util.List;
 

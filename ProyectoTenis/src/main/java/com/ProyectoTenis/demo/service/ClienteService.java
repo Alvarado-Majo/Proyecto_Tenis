@@ -4,9 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import practica.practica.domain.Cliente;
-import practica.practica.repository.ClienteRepository;
-
+import com.ProyectoTenis.demo.domain.Cliente;
+import com.ProyectoTenis.demo.repository.ClienteRepository;
 import java.util.Optional;
 
 @Service

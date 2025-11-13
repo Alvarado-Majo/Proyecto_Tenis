@@ -5,9 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import practica.practica.domain.Categoria;
-import practica.practica.service.CategoriaService;
-
+import com.ProyectoTenis.demo.domain.Categoria;
+import com.ProyectoTenis.demo.service.CategoriaService;
 import java.util.List;
 import java.util.Optional;
 

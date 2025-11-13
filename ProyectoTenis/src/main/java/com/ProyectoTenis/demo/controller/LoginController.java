@@ -5,11 +5,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import practica.practica.domain.Administrador;
-import practica.practica.domain.Cliente;
-import practica.practica.service.AdministradorService;
-import practica.practica.service.ClienteService;
-
+import com.ProyectoTenis.demo.domain.Administrador;
+import com.ProyectoTenis.demo.domain.Cliente;
+import com.ProyectoTenis.demo.service.AdministradorService;
+import com.ProyectoTenis.demo.service.ClienteService;
 import java.util.Optional;
 
 @Controller
