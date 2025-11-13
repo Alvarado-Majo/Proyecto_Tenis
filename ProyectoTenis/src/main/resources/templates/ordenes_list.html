@@ -1,15 +1,49 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Órdenes</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor">
+
+    <h1 class="titulo">Mis Órdenes</h1>
+
+    <table class="tabla-ordenes">
+
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="o : ${ordenes}">
+            <td th:text="${o.idOrden}"></td>
+            <td th:text="${o.fecha}"></td>
+            <td>₡ <span th:text="${o.total}"></span></td>
+            <td th:text="${o.estado}"></td>
+            <td>
+                <a th:href="@{'/ordenes/detalle/' + ${o.idOrden}}" class="btn-detalle">Ver</a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>
+
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
 </html>

@@ -3,58 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <title>Detalles del Producto</title>
-
-    <!-- Estilos -->
-    <link rel="stylesheet" th:href="@{/static.css/estilos.css}">
-    <link rel="stylesheet" 
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
+
 <body>
 
 <!-- NAVBAR -->
-<div th:replace="templates.general/fragmentos :: navbar"></div>
+<div th:replace="general/fragmentos :: navbar"></div>
 
 <div class="contenedor-detalle">
-    <div class="tarjeta-detalle">
 
-        <!-- IMAGEN -->
-        <div class="img-detalle">
-            <img th:src="@{${tenis.imagen}}" alt="Imagen del tenis">
-        </div>
+    <div class="detalle-card" th:if="${tenis != null}">
+        
+        <img th:src="@{${tenis.imagen}}" class="detalle-img">
 
-        <!-- INFORMACIÓN -->
-        <div class="info-detalle">
-
-            <h2 class="titulo-detalle" th:text="${tenis.nombre}"></h2>
-
-            <p class="marca-detalle">
-                <strong>Marca:</strong> <span th:text="${tenis.marca}"></span>
-            </p>
+        <div class="detalle-info">
+            <h2 th:text="${tenis.nombre}"></h2>
 
             <p class="precio-detalle">
-                <strong>Precio: </strong> ₡<span th:text="${tenis.precio}"></span>
+                ₡ <span th:text="${tenis.precio}"></span>
             </p>
 
-            <p class="descripcion-detalle" th:text="${tenis.descripcion}">
+            <p><strong>Marca:</strong> <span th:text="${tenis.marca}"></span></p>
+
+            <p><strong>Categoría:</strong> 
+                <span th:text="${tenis.categoria.nombre}"></span>
             </p>
 
-            <!-- FORMULARIO AGREGAR AL CARRITO -->
-            <form th:action="@{'/agregar-carrito/' + ${tenis.idTenis}}" method="post" class="form-carrito">
+            <form th:action="@{'/agregar-carrito/' + ${tenis.idTenis}}" method="post">
                 <label>Cantidad:</label>
-                <input type="number" name="cantidad" min="1" value="1" required>
+                <input type="number" name="cantidad" value="1" min="1" class="input-cantidad">
 
                 <button type="submit" class="btn-agregar">
-                    <i class="fa fa-cart-plus"></i> Agregar al carrito
+                    Agregar al carrito 🛒
                 </button>
             </form>
 
+            <a href="/" class="btn-volver">Volver al catálogo</a>
         </div>
+
     </div>
+
 </div>
 
 <!-- FOOTER -->
-<div th:replace="templates.general/fragmentos :: footer"></div>
+<div th:replace="general/fragmentos :: footer"></div>
 
 </body>
 </html>

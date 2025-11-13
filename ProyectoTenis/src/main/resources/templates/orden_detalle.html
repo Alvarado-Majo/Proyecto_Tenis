@@ -1,15 +1,55 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de Orden</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor">
+
+    <h1 class="titulo">Detalle de Orden</h1>
+
+    <div class="detalle-orden-box">
+
+        <p><strong>ID Orden:</strong> <span th:text="${orden.idOrden}"></span></p>
+        <p><strong>Fecha:</strong> <span th:text="${orden.fecha}"></span></p>
+        <p><strong>Estado:</strong> <span th:text="${orden.estado}"></span></p>
+
+        <table class="tabla-detalle">
+            <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cant</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="d : ${detalles}">
+                <td th:text="${d.tenis.nombre}"></td>
+                <td th:text="${d.precioUnit}"></td>
+                <td th:text="${d.cantidad}"></td>
+                <td th:text="${d.precioUnit * d.cantidad}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p class="total-final">Total: ₡ <span th:text="${total}"></span></p>
+
+        <a href="/ordenes" class="btn-volver">Volver</a>
+
+    </div>
+
+</div>
+
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
 </html>

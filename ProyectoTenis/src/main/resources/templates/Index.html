@@ -1,35 +1,110 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Tenis Shop</title>
-    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+<!-- ✨ Navbar -->
 <div th:replace="general/fragmentos :: navbar"></div>
 
-<h1 style="text-align:center; margin-top:25px; color:#FF4FA3;">
-    Catálogo de Tenis
-</h1>
+<div class="contenedor">
 
-<div style="width:90%; margin:auto; display:grid; grid-template-columns:repeat(3, 1fr); gap:25px; margin-top:30px;">
+    <h1 class="titulo">Catálogo de Tenis</h1>
 
-    <div class="card-tenis" th:each="t : ${tenisList}">
-        <img th:src="${t.imagen}" style="width:100%; height:180px; object-fit:cover; border-radius:10px;">
+    <!-- 🔍 FILTROS -->
+    <div class="filtros">
+        <form method="get" action="/" style="display:inline;">
+        
+            <select name="categoria">
+                <option value="">Todas las categorías</option>
+                <option th:each="cat : ${categorias}"
+                        th:value="${cat.idCategoria}"
+                        th:text="${cat.nombre}"
+                        th:selected="${idCategoria == cat.idCategoria}">
+                </option>
+            </select>
 
-        <h3 th:text="${t.nombre}" style="color:#FF4FA3;"></h3>
-        <p th:text="${t.marca}"></p>
-        <p style="font-weight:bold; color:#15C7C7;">₡ <span th:text="${t.precio}"></span></p>
+            <input type="text" name="buscar" placeholder="Buscar..."
+                   th:value="${buscar}" />
 
-        <a th:href="@{'/detalle/' + ${t.idTenis}}" class="btn-turquesa">Ver detalles</a>
+            <button type="submit">Filtrar</button>
+        </form>
+    </div>
+
+    <!-- 🛒 CATALOGO -->
+    <div class="catalogo">
+        <div class="card" th:each="tenis : ${tenisList}">
+        
+            <img th:src="@{${tenis.imagen}}" alt="Imagen del tenis">
+
+            <h3 th:text="${tenis.nombre}"></h3>
+
+            <p>₡ <span th:text="${tenis.precio}"></span></p>
+
+            <a th:href="@{'/detalle/' + ${tenis.idTenis}}"
+               class="btn-comprar">Ver Detalles</a>
+        </div>
     </div>
 
 </div>
 
-<!-- FOOTER -->
+<!-- ✨ Footer -->
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
+</html>
+
+</head>
+
+<body>
+
+<!-- ✨ NAVBAR (fragmento) -->
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor">
+
+    <h1 class="titulo">Catálogo de Tenis</h1>
+
+    <!-- 🔍 FILTROS -->
+    <div class="filtros">
+        <form method="get" action="/" style="display:inline;">
+            <select name="categoria">
+                <option value="">Todas las categorías</option>
+                <option th:each="cat : ${categorias}"
+                        th:value="${cat.idCategoria}"
+                        th:text="${cat.nombre}"
+                        th:selected="${idCategoria == cat.idCategoria}">
+                </option>
+            </select>
+
+            <input type="text" name="buscar" placeholder="Buscar..."
+                   th:value="${buscar}" />
+
+            <button type="submit">Filtrar</button>
+        </form>
+    </div>
+
+    <!-- 🛒 CATALOGO DE PRODUCTOS -->
+    <div class="catalogo">
+        <div class="card" th:each="tenis : ${tenisList}">
+            <img th:src="@{${tenis.imagen}}" alt="Imagen del tenis">
+
+            <h3 th:text="${tenis.nombre}"></h3>
+            <p>₡ <span th:text="${tenis.precio}"></span></p>
+
+            <a th:href="@{'/detalle/' + ${tenis.idTenis}}"
+               class="btn-comprar">Ver Detalles</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- ✨ FOOTER (fragmento) -->
 <div th:replace="general/fragmentos :: footer"></div>
 
 </body>
