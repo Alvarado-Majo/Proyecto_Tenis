@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Carrito</title>
+
+    <link rel="stylesheet" th:href="@{/static.css/estilos.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="templates.general/fragmentos :: navbar"></div>
+
+<div class="carrito-container">
+
+    <h1 class="titulo-carrito">🛒 Mi Carrito</h1>
+
+    <!-- MENSAJES -->
+    <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- SI NO HAY PRODUCTOS -->
+    <div th:if="${productos.size() == 0}" class="mensaje-vacio">
+        <p>Tu carrito está vacío.</p>
+        <a href="/" class="btn-volver">Volver al catálogo</a>
+    </div>
+
+    <!-- LISTA PRODUCTOS -->
+    <div th:if="${productos.size() > 0}" class="tabla-carrito">
+
+        <table>
+            <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="p : ${productos}">
+                <td>
+                    <img th:src="@{${p.tenis.imagen}}" class="img-carrito">
+                </td>
+
+                <td th:text="${p.tenis.nombre}"></td>
+
+                <td>₡ <span th:text="${p.precioUnit}"></span></td>
+
+                <td th:text="${p.cantidad}"></td>
+
+                <td>
+                    ₡ <span th:text="${p.precioUnit.multiply(T(java.math.BigDecimal).valueOf(p.cantidad))}"></span>
+                </td>
+
+                <td>
+                    <a class="btn-eliminar"
+                       th:href="@{'/carrito/eliminar/' + ${p.tenis.idTenis}}">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- TOTAL -->
+        <div class="total-carrito">
+            <h3>Total: ₡ <span th:text="${total}"></span></h3>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="acciones-carrito">
+            <a href="/" class="btn-volver">← Seguir comprando</a>
+
+            <a th:href="@{'/ordenes/crear'}" class="btn-comprar">
+                Finalizar compra
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="templates.general/fragmentos :: footer"></div>
+
+</body>
+</html>

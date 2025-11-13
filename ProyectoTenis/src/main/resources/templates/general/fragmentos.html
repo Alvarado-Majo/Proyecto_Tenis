@@ -1,15 +1,70 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- ========== NAVBAR ========== -->
+<th:block th:fragment="navbar">
+    <nav class="navbar">
+        <div class="nav-logo">
+            <a href="/">TENIS SHOP</a>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">Inicio</a>
+            <a href="/carrito">Carrito</a>
+            <a href="/ordenes">Mis órdenes</a>
+            <a href="/login">Login</a>
+        </div>
+    </nav>
+
+    <style>
+        /* ---------------- NAVBAR ---------------- */
+        .navbar {
+            background: #15C7C7;        /* turquesa */
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .nav-logo a {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            margin-left: 20px;
+            color: white;
+            font-weight: 500;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #FF66C4;           /* rosado */
+        }
+    </style>
+</th:block>
+
+<!-- ========== FOOTER ========== -->
+<th:block th:fragment="footer">
+    <footer class="footer">
+        © 2025 Tenis Shop | Grupo 2
+    </footer>
+
+    <style>
+        /* ---------------- FOOTER ---------------- */
+        .footer {
+            background: #15C7C7;    /* turquesa */
+            text-align: center;
+            padding: 15px;
+            margin-top: 40px;
+            font-weight: 500;
+            color: white;
+        }
+    </style>
+</th:block>
+
 </html>
