@@ -19,12 +19,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class TenisController {
 
-    // **********************
-    // LISTA SIMULADA (SIN BD)
-    // **********************
+   
     private static List<Tenis> listaTenis = new ArrayList<>();
 
-    // Constructor para agregar tenis de prueba
+   
     public TenisController() {
         if (listaTenis.isEmpty()) {
              listaTenis.add(new Tenis(1, "Nike Air Max", "Tenis deportivos", 45000, "Hombre", 10));
@@ -33,18 +31,14 @@ public class TenisController {
         }
     }
 
-    // *************************************
-    // HU #1 - CONSULTAR PRODUCTOS (LEER)
-    // *************************************
+    
     @GetMapping("/tenis/listado")
     public String listarTenis(Model model) {
         model.addAttribute("tenis", listaTenis);
         return "tenis/listado"; // HTML listado
     }
 
-    // *************************************
-    // HU #2 - ELIMINAR TENIS
-    // *************************************
+    
     @GetMapping("/tenis/eliminar/{id}")
     public String eliminarTenis(@PathVariable int id) {
         listaTenis.removeIf(t -> t.getIdTenis() == id);
