@@ -26,11 +26,11 @@ public class Carrito implements Serializable {
 
     @NotNull
     @Column(name = "estado", nullable = false, length = 20)
-    private String estado; // ABIERTO o PAGADO
+    private String estado;  // ABIERTO o PAGADO
 
     @Column(name = "fecha_creacion")
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCreacion = LocalDateTime.now(); 
 
-    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CarritoDetalle> detalles;
 }

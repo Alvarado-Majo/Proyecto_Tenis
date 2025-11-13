@@ -34,5 +34,4 @@ public class OrdenDetalle implements Serializable {
     @NotNull
     @Column(name = "precio_unit", nullable = false)
     private BigDecimal precioUnit;
-
 }

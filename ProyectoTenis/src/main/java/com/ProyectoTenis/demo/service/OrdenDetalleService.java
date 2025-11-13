@@ -16,7 +16,7 @@ public class OrdenDetalleService {
     private OrdenDetalleRepository ordenDetalleRepository;
 
     /**
-     * Guarda todos los detalles de una orden a partir del carrito del cliente.
+     * Guarda todos los detalles de una orden a partir del carrito.
      */
     public void guardarDetallesDesdeCarrito(List<CarritoDetalle> itemsCarrito, Orden orden) {
         for (CarritoDetalle item : itemsCarrito) {
@@ -24,7 +24,7 @@ public class OrdenDetalleService {
             detalle.setOrden(orden);
             detalle.setTenis(item.getTenis());
             detalle.setCantidad(item.getCantidad());
-            detalle.setPrecioUnit(item.getPrecioUnit()); // CORREGIDO
+            detalle.setPrecioUnit(item.getPrecioUnit()); 
 
             ordenDetalleRepository.save(detalle);
         }
@@ -38,25 +38,26 @@ public class OrdenDetalleService {
     }
 
     /**
-     * Calcula el subtotal (cantidad × precioUnit)
+     * Calcula el subtotal = precioUnit × cantidad
      */
     public BigDecimal calcularSubtotal(OrdenDetalle detalle) {
-        return BigDecimal.valueOf(detalle.getPrecioUnit())
+        return detalle.getPrecioUnit()                     // BigDecimal ✔
                 .multiply(BigDecimal.valueOf(detalle.getCantidad()));
     }
 
     /**
-     * Calcula el total de una orden sumando todos los subtotales.
+     * Calcula el total sumando subtotales.
      */
     public BigDecimal calcularTotal(Orden orden) {
         List<OrdenDetalle> detalles = listarPorOrden(orden);
+
         return detalles.stream()
                 .map(this::calcularSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
-     * Elimina todos los detalles de la orden.
+     * Elimina todos los detalles de una orden.
      */
     public void eliminarPorOrden(Orden orden) {
         List<OrdenDetalle> detalles = listarPorOrden(orden);

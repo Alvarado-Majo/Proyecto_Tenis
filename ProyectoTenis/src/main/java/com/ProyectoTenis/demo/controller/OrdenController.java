@@ -16,7 +16,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/ordenes")
-@SessionAttributes("cliente")
+@SessionAttributes("clienteSesion")
 public class OrdenController {
 
     @Autowired
@@ -26,14 +26,12 @@ public class OrdenController {
     private OrdenDetalleService ordenDetalleService;
 
     /**
-     * Lista todas las órdenes de un cliente.
+     * Lista todas las órdenes del cliente
      */
     @GetMapping
     public String listarOrdenes(
-            @SessionAttribute(name = "cliente", required = false) Cliente cliente,
-            Model model,
-            @RequestParam(value = "ok", required = false) String ok,
-            @RequestParam(value = "error", required = false) String error) {
+            @SessionAttribute(name = "clienteSesion", required = false) Cliente cliente,
+            Model model) {
 
         if (cliente == null) {
             model.addAttribute("error", "Debe iniciar sesión para ver sus órdenes.");
@@ -42,38 +40,36 @@ public class OrdenController {
 
         List<Orden> ordenes = ordenService.listarPorCliente(cliente);
         model.addAttribute("ordenes", ordenes);
-        model.addAttribute("ok", ok);
-        model.addAttribute("error", error);
 
         return "ordenes_list";
     }
 
     /**
-     * Detalles de una orden.
+     * Ver detalle de una orden específica
      */
     @GetMapping("/detalle/{id}")
     public String verDetalle(
             @PathVariable("id") Long idOrden,
-            @SessionAttribute(name = "cliente", required = false) Cliente cliente,
+            @SessionAttribute(name = "clienteSesion", required = false) Cliente cliente,
             Model model,
             RedirectAttributes ra) {
 
         if (cliente == null) {
-            ra.addFlashAttribute("error", "Debe iniciar sesión para ver los detalles de la orden.");
+            ra.addFlashAttribute("error", "Debe iniciar sesión para ver esta orden.");
             return "redirect:/login";
         }
 
         Orden orden = ordenService.buscarPorId(idOrden)
                 .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada."));
 
-        // Validar propietario de la orden
+        // Validación del dueño de la orden
         if (!orden.getCliente().getIdCliente().equals(cliente.getIdCliente())) {
             ra.addFlashAttribute("error", "No tiene permiso para ver esta orden.");
             return "redirect:/ordenes";
         }
 
         List<OrdenDetalle> detalles = ordenDetalleService.listarPorOrden(orden);
-        BigDecimal total = ordenService.calcularTotal(orden);
+        BigDecimal total = BigDecimal.valueOf(ordenService.calcularTotal(orden));
 
         model.addAttribute("orden", orden);
         model.addAttribute("detalles", detalles);
@@ -83,12 +79,12 @@ public class OrdenController {
     }
 
     /**
-     * Cancelar orden.
+     * Cancelar una orden
      */
     @PostMapping("/cancelar/{id}")
     public String cancelarOrden(
             @PathVariable("id") Long idOrden,
-            @SessionAttribute(name = "cliente", required = false) Cliente cliente,
+            @SessionAttribute(name = "clienteSesion", required = false) Cliente cliente,
             RedirectAttributes ra) {
 
         if (cliente == null) {
@@ -98,7 +94,7 @@ public class OrdenController {
 
         try {
             ordenService.cambiarEstado(idOrden, "CANCELADA");
-            ra.addFlashAttribute("ok", "La orden fue cancelada correctamente.");
+            ra.addFlashAttribute("ok", "La orden fue cancelada exitosamente.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No se pudo cancelar la orden: " + e.getMessage());
         }

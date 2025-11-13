@@ -42,6 +42,6 @@ public class Tenis implements Serializable {
     private String imagen;
 
     @ManyToOne
-    @JoinColumn(name = "id_categoria")
+    @JoinColumn(name = "id_categoria", nullable = false)
     private Categoria categoria;
 }

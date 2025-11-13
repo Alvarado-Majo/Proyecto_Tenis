@@ -16,16 +16,15 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // Encriptador de contraseñas
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
-     * Registrar nuevo cliente (se usa en el controlador).
+     * Registrar nuevo cliente
      */
     public boolean registrarCliente(Cliente cliente) {
         Optional<Cliente> existente = clienteRepository.findByCorreo(cliente.getCorreo());
         if (existente.isPresent()) {
-            return false; // ya existe un cliente con ese correo
+            return false;
         }
 
         cliente.setPassword(passwordEncoder.encode(cliente.getPassword()));
@@ -34,21 +33,21 @@ public class ClienteService {
     }
 
     /**
-     * Alias requerido por controladores antiguos.
+     * Alias para el controlador antiguo
      */
     public boolean registrar(Cliente cliente) {
         return registrarCliente(cliente);
     }
 
     /**
-     * Actualizar perfil del cliente.
+     * Actualizar datos del cliente
      */
     public Cliente actualizar(Cliente cliente) {
         return clienteRepository.save(cliente);
     }
 
     /**
-     * Validar inicio de sesión.
+     * Validación de login
      */
     public boolean validarLogin(String correo, String password) {
         Optional<Cliente> clienteOpt = clienteRepository.findByCorreo(correo);
@@ -61,14 +60,14 @@ public class ClienteService {
     }
 
     /**
-     * Buscar por correo.
+     * Buscar cliente por correo
      */
     public Optional<Cliente> buscarPorCorreo(String correo) {
         return clienteRepository.findByCorreo(correo);
     }
 
     /**
-     * Buscar por ID (Long, según tu entidad).
+     * Buscar cliente por ID
      */
     public Optional<Cliente> buscarPorId(Long idCliente) {
         return clienteRepository.findById(idCliente);

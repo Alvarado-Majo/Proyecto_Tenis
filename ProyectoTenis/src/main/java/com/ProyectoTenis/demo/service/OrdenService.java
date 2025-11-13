@@ -27,7 +27,7 @@ public class OrdenService {
     private CarritoService carritoService;
 
     /**
-     * Crea una orden completa a partir del carrito activo.
+     * Crear una orden desde el carrito.
      */
     public Orden crearOrden(Cliente cliente) {
 
@@ -35,70 +35,61 @@ public class OrdenService {
         List<CarritoDetalle> detallesCarrito = carritoDetalleRepository.findByCarrito(carrito);
 
         if (detallesCarrito.isEmpty()) {
-            throw new IllegalStateException("El carrito está vacío. No se puede generar la orden.");
+            throw new IllegalStateException("El carrito está vacío.");
         }
 
         // Calcular total con Double
         double total = detallesCarrito.stream()
-                .mapToDouble(cd -> cd.getPrecioUnit() * cd.getCantidad())
+                .mapToDouble(cd -> cd.getPrecioUnit().doubleValue() * cd.getCantidad())
                 .sum();
 
-        // Crear Orden
+        // Crear orden
         Orden orden = new Orden();
         orden.setCliente(cliente);
-        orden.setFecha(LocalDateTime.now().toString()); // porque tu campo es String
+        orden.setFecha(LocalDateTime.now()); // OK porque tu campo es LocalDateTime
         orden.setEstado("PENDIENTE");
         orden.setTotal(total);
+
         orden = ordenRepository.save(orden);
 
-        // Crear detalles
+        // Crear detalles de la orden
         for (CarritoDetalle cd : detallesCarrito) {
             OrdenDetalle od = new OrdenDetalle();
             od.setOrden(orden);
             od.setTenis(cd.getTenis());
             od.setCantidad(cd.getCantidad());
-            od.setPrecioUnit(cd.getPrecioUnit());
+            od.setPrecioUnit(cd.getPrecioUnit()); // BigDecimal está bien
             ordenDetalleRepository.save(od);
         }
 
-        // Cerrar carrito y eliminar contenido
+        // Cerrar carrito y vaciarlo
         carritoService.cerrarCarrito(cliente);
         carritoDetalleRepository.deleteAll(detallesCarrito);
 
         return orden;
     }
 
-    /**
-     * Lista todas las órdenes de un cliente.
-     */
-    public List<Orden> listarPorCliente(Cliente cliente) {
-        return ordenRepository.findByCliente(cliente);
-    }
-
-    /**
-     * Busca una orden por ID.
-     */
     public Optional<Orden> buscarPorId(Long idOrden) {
         return ordenRepository.findById(idOrden);
     }
 
-    /**
-     * Cambia el estado de una orden.
-     */
+    public List<Orden> listarPorCliente(Cliente cliente) {
+        return ordenRepository.findByCliente(cliente);
+    }
+
     public void cambiarEstado(Long idOrden, String nuevoEstado) {
         Orden orden = ordenRepository.findById(idOrden)
-                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada."));
+                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
+
         orden.setEstado(nuevoEstado.toUpperCase());
         ordenRepository.save(orden);
     }
 
-    /**
-     * Calcula el total de la orden usando Double.
-     */
     public double calcularTotal(Orden orden) {
         List<OrdenDetalle> detalles = ordenDetalleRepository.findByOrden(orden);
+
         return detalles.stream()
-                .mapToDouble(d -> d.getPrecioUnit() * d.getCantidad())
+                .mapToDouble(d -> d.getPrecioUnit().doubleValue() * d.getCantidad())
                 .sum();
     }
 }

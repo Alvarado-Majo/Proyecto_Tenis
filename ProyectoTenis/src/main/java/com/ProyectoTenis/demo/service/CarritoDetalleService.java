@@ -3,12 +3,12 @@ package com.ProyectoTenis.demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ProyectoTenis.demo.domain.Carrito;
-import com.ProyectoTenis.demo.domain.CarritoDetalle;
-import com.ProyectoTenis.demo.domain.Tenis;
+import com.ProyectoTenis.demo.domain.*;
 import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CarritoDetalleService {
@@ -17,42 +17,44 @@ public class CarritoDetalleService {
     private CarritoDetalleRepository carritoDetalleRepository;
 
     /**
-     * Lista todos los productos dentro de un carrito.
+     * Lista todos los productos dentro del carrito.
      */
     public List<CarritoDetalle> listarPorCarrito(Carrito carrito) {
         return carritoDetalleRepository.findByCarrito(carrito);
     }
 
     /**
-     * Busca un detalle del carrito por tenis.
+     * Busca un detalle por carrito + tenis.
      */
-    public CarritoDetalle buscarPorCarritoYTenis(Carrito carrito, Tenis tenis) {
-        return carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis);
+    public Optional<CarritoDetalle> buscarPorCarritoYTenis(Carrito carrito, Tenis tenis) {
+        return Optional.ofNullable(
+                carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis)
+        );
     }
 
     /**
-     * Agregar o actualizar un producto en el carrito.
+     * Agrega o actualiza un producto en el carrito.
      */
     public CarritoDetalle agregarOActualizar(Carrito carrito, Tenis tenis, int cantidad) {
 
         if (cantidad <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor a cero.");
+            throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
         }
 
-        CarritoDetalle existente = buscarPorCarritoYTenis(carrito, tenis);
+        Optional<CarritoDetalle> existenteOpt = buscarPorCarritoYTenis(carrito, tenis);
 
-        if (existente != null) {
-            // Ya existe → sumar cantidad
+        if (existenteOpt.isPresent()) {
+            CarritoDetalle existente = existenteOpt.get();
             existente.setCantidad(existente.getCantidad() + cantidad);
             return carritoDetalleRepository.save(existente);
         }
 
-        // Crear nuevo detalle
+        // Nuevo detalle
         CarritoDetalle nuevo = new CarritoDetalle();
         nuevo.setCarrito(carrito);
         nuevo.setTenis(tenis);
         nuevo.setCantidad(cantidad);
-        nuevo.setPrecioUnit(tenis.getPrecio());
+        nuevo.setPrecioUnit(tenis.getPrecio()); // BigDecimal ✔
 
         return carritoDetalleRepository.save(nuevo);
     }
@@ -66,11 +68,8 @@ public class CarritoDetalleService {
             throw new IllegalArgumentException("La cantidad no puede ser negativa.");
         }
 
-        CarritoDetalle detalle = buscarPorCarritoYTenis(carrito, tenis);
-
-        if (detalle == null) {
-            throw new IllegalArgumentException("El producto no está en el carrito.");
-        }
+        CarritoDetalle detalle = buscarPorCarritoYTenis(carrito, tenis)
+                .orElseThrow(() -> new IllegalArgumentException("El producto no está en el carrito."));
 
         if (nuevaCantidad == 0) {
             carritoDetalleRepository.delete(detalle);
@@ -92,17 +91,16 @@ public class CarritoDetalleService {
      * Eliminar usando carrito + tenis.
      */
     public void eliminarPorCarritoYTenis(Carrito carrito, Tenis tenis) {
-        CarritoDetalle detalle = buscarPorCarritoYTenis(carrito, tenis);
-        if (detalle != null) {
-            carritoDetalleRepository.delete(detalle);
-        }
+        buscarPorCarritoYTenis(carrito, tenis)
+                .ifPresent(carritoDetalleRepository::delete);
     }
 
     /**
-     * Calcular subtotal (Double).
+     * Calcular subtotal correctamente con BigDecimal.
      */
-    public double calcularSubtotal(CarritoDetalle detalle) {
-        return detalle.getPrecioUnit() * detalle.getCantidad();
+    public BigDecimal calcularSubtotal(CarritoDetalle detalle) {
+        return detalle.getPrecioUnit() // BigDecimal
+                .multiply(BigDecimal.valueOf(detalle.getCantidad()));
     }
 
     /**

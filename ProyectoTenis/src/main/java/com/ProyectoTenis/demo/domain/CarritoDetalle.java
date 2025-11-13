@@ -3,6 +3,7 @@ package com.ProyectoTenis.demo.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
@@ -31,5 +32,6 @@ public class CarritoDetalle implements Serializable {
 
     @NotNull
     @Column(name = "precio_unit", nullable = false)
-    private Double precioUnit;
+    private BigDecimal precioUnit;  
 }
+

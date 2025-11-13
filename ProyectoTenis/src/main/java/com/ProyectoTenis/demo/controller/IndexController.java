@@ -37,7 +37,8 @@ public class IndexController {
 
         // FILTRO POR CATEGORIA
         if (idCategoria != null) {
-            Optional<Categoria> categoriaOpt = categoriaService.buscarPorId(idCategoria);
+            Optional<Categoria> categoriaOpt = categoriaService.buscarPorId(idCategoria.longValue()); // CORRECCIÓN
+
             if (categoriaOpt.isPresent()) {
                 tenisList = tenisService.listarPorCategoria(categoriaOpt.get());
             } else {
@@ -77,7 +78,7 @@ public class IndexController {
 
     @PostMapping("/agregar-carrito/{id}")
     public String agregarAlCarrito(
-            @PathVariable("id") Integer idTenis,
+            @PathVariable("id") Long idTenis, // CAMBIADO A LONG
             @RequestParam(defaultValue = "1") int cantidad,
             @SessionAttribute(name = "cliente", required = false) Cliente cliente,
             RedirectAttributes ra) {
@@ -88,7 +89,7 @@ public class IndexController {
         }
 
         try {
-            carritoService.agregarProducto(cliente, idTenis, cantidad);
+            carritoService.agregarProducto(cliente, idTenis.intValue(), cantidad); // SE MANTIENE INT PARA EL SERVICIO
             ra.addFlashAttribute("ok", "Producto agregado al carrito.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -97,3 +98,4 @@ public class IndexController {
         return "redirect:/";
     }
 }
+

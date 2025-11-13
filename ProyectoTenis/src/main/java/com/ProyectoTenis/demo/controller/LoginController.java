@@ -4,6 +4,7 @@ import com.ProyectoTenis.demo.domain.Cliente;
 import com.ProyectoTenis.demo.domain.Administrador;
 import com.ProyectoTenis.demo.service.ClienteService;
 import com.ProyectoTenis.demo.service.AdministradorService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,7 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/login")
-@SessionAttributes({"cliente", "admin"})
+@SessionAttributes({"clienteSesion", "adminSesion"})
 public class LoginController {
 
     @Autowired
@@ -40,6 +41,7 @@ public class LoginController {
             @ModelAttribute Cliente cliente,
             Model model
     ) {
+
         boolean valido = clienteService.validarLogin(cliente.getCorreo(), cliente.getPassword());
 
         if (!valido) {
@@ -48,7 +50,9 @@ public class LoginController {
         }
 
         Cliente clienteBD = clienteService.buscarPorCorreo(cliente.getCorreo()).get();
-        model.addAttribute("cliente", clienteBD); // Sesión Cliente
+
+        // Guardar en sesión
+        model.addAttribute("clienteSesion", clienteBD);
 
         return "redirect:/";
     }
@@ -61,6 +65,7 @@ public class LoginController {
             @ModelAttribute Administrador admin,
             Model model
     ) {
+
         boolean valido = administradorService.validarLogin(admin.getUsuario(), admin.getPassword());
 
         if (!valido) {
@@ -68,8 +73,9 @@ public class LoginController {
             return "login";
         }
 
-        Administrador adminBD = administradorService.buscarPorUsuario(admin.getUsuario()).get();
-        model.addAttribute("admin", adminBD); // Sesión Admin
+        Administrador adminBD = administradorService.buscarPorUsuario(admin.getUsuario());
+        model.addAttribute("adminSesion", adminBD);
+
 
         return "redirect:/admin";
     }

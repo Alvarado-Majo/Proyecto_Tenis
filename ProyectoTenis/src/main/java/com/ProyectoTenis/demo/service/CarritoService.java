@@ -8,6 +8,7 @@ import com.ProyectoTenis.demo.repository.CarritoRepository;
 import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
 import com.ProyectoTenis.demo.repository.TenisRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -53,15 +54,13 @@ public class CarritoService {
         Tenis tenis = tenisRepository.findById(Long.valueOf(idTenis))
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
 
-        // Buscar si ya existe el producto en el carrito
+        // Buscar si ya existe el producto en el carrito (NO ES OPTIONAL)
         CarritoDetalle existente = carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis);
 
         if (existente != null) {
-            // Si existe, sumar cantidad
             existente.setCantidad(existente.getCantidad() + cantidad);
             carritoDetalleRepository.save(existente);
         } else {
-            // Si no existe, crear nuevo detalle
             CarritoDetalle nuevo = new CarritoDetalle();
             nuevo.setCarrito(carrito);
             nuevo.setTenis(tenis);
@@ -97,12 +96,14 @@ public class CarritoService {
     }
 
     /**
-     * Calcular total con Double.
+     * Calcular total usando BigDecimal.
      */
-    public double calcularTotal(Cliente cliente) {
+    public BigDecimal calcularTotal(Cliente cliente) {
+
         return listarProductos(cliente).stream()
-                .mapToDouble(cd -> cd.getPrecioUnit() * cd.getCantidad())
-                .sum();
+                .map(cd -> cd.getPrecioUnit()
+                        .multiply(BigDecimal.valueOf(cd.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
