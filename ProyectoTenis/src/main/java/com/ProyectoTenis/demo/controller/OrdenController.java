@@ -10,6 +10,7 @@ import com.ProyectoTenis.demo.domain.Orden;
 import com.ProyectoTenis.demo.domain.OrdenDetalle;
 import com.ProyectoTenis.demo.service.OrdenService;
 import com.ProyectoTenis.demo.service.OrdenDetalleService;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -25,13 +26,15 @@ public class OrdenController {
     private OrdenDetalleService ordenDetalleService;
 
     /**
-     * Muestra todas las órdenes del cliente logueado.
+     * Lista todas las órdenes de un cliente.
      */
     @GetMapping
-    public String listarOrdenes(@SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                                Model model,
-                                @RequestParam(value = "ok", required = false) String ok,
-                                @RequestParam(value = "error", required = false) String error) {
+    public String listarOrdenes(
+            @SessionAttribute(name = "cliente", required = false) Cliente cliente,
+            Model model,
+            @RequestParam(value = "ok", required = false) String ok,
+            @RequestParam(value = "error", required = false) String error) {
+
         if (cliente == null) {
             model.addAttribute("error", "Debe iniciar sesión para ver sus órdenes.");
             return "redirect:/login";
@@ -42,17 +45,19 @@ public class OrdenController {
         model.addAttribute("ok", ok);
         model.addAttribute("error", error);
 
-        return "ordenes_list"; // plantilla HTML con historial de compras
+        return "ordenes_list";
     }
 
     /**
-     * Muestra los detalles de una orden específica.
+     * Detalles de una orden.
      */
     @GetMapping("/detalle/{id}")
-    public String verDetalle(@PathVariable("id") Integer idOrden,
-                             @SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                             Model model,
-                             RedirectAttributes ra) {
+    public String verDetalle(
+            @PathVariable("id") Long idOrden,
+            @SessionAttribute(name = "cliente", required = false) Cliente cliente,
+            Model model,
+            RedirectAttributes ra) {
+
         if (cliente == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión para ver los detalles de la orden.");
             return "redirect:/login";
@@ -61,29 +66,31 @@ public class OrdenController {
         Orden orden = ordenService.buscarPorId(idOrden)
                 .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada."));
 
-        // Verificar que la orden pertenece al cliente logueado
-        if (!orden.getCliente().getId_cliente().equals(cliente.getId_cliente())) {
+        // Validar propietario de la orden
+        if (!orden.getCliente().getIdCliente().equals(cliente.getIdCliente())) {
             ra.addFlashAttribute("error", "No tiene permiso para ver esta orden.");
             return "redirect:/ordenes";
         }
 
         List<OrdenDetalle> detalles = ordenDetalleService.listarPorOrden(orden);
-        BigDecimal total = ordenDetalleService.calcularTotal(orden);
+        BigDecimal total = ordenService.calcularTotal(orden);
 
         model.addAttribute("orden", orden);
         model.addAttribute("detalles", detalles);
         model.addAttribute("total", total);
 
-        return "orden_detalle"; // plantilla HTML con detalle de productos comprados
+        return "orden_detalle";
     }
 
     /**
-     * Permite cancelar una orden (opcional).
+     * Cancelar orden.
      */
     @PostMapping("/cancelar/{id}")
-    public String cancelarOrden(@PathVariable("id") Integer idOrden,
-                                @SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                                RedirectAttributes ra) {
+    public String cancelarOrden(
+            @PathVariable("id") Long idOrden,
+            @SessionAttribute(name = "cliente", required = false) Cliente cliente,
+            RedirectAttributes ra) {
+
         if (cliente == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión para cancelar una orden.");
             return "redirect:/login";

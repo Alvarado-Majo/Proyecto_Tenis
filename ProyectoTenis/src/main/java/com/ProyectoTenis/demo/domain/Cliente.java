@@ -3,21 +3,15 @@ package com.ProyectoTenis.demo.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.io.Serializable;
 import lombok.Data;
-import java.util.List;
 
+import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "cliente")
 public class Cliente implements Serializable {
-    @OneToOne(mappedBy = "cliente")
-    private Carrito carrito;
-
-    @OneToMany(mappedBy = "cliente")
-    private List<Pedido> pedidos;
-
 
     private static final long serialVersionUID = 1L;
 
@@ -48,4 +42,11 @@ public class Cliente implements Serializable {
     @Size(max = 255)
     @Column(name = "direccion", length = 255)
     private String direccion;
+
+    @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL)
+    private Carrito carrito;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
+    private List<Orden> ordenes;
+
 }

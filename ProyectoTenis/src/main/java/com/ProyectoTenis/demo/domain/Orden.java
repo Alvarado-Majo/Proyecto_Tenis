@@ -2,15 +2,17 @@ package com.ProyectoTenis.demo.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "orden")
 public class Orden implements Serializable {
-
-    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +25,7 @@ public class Orden implements Serializable {
 
     @NotNull
     @Column(name = "fecha")
-    private String fecha;
+    private LocalDateTime fecha;
 
     @NotNull
     @Column(name = "total", nullable = false)
@@ -31,5 +33,5 @@ public class Orden implements Serializable {
 
     @NotNull
     @Column(name = "estado", nullable = false, length = 20)
-    private String estado; // PENDIENTE, PAGADA, CANCELADA
+    private String estado;
 }

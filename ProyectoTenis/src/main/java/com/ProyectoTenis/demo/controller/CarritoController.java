@@ -33,9 +33,11 @@ public class CarritoController {
      */
     @GetMapping
     public String verCarrito(@SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                             Model model) {
+                             Model model,
+                             RedirectAttributes ra) {
+
         if (cliente == null) {
-            model.addAttribute("error", "Debe iniciar sesión para ver su carrito.");
+            ra.addFlashAttribute("error", "Debe iniciar sesión para ver su carrito.");
             return "redirect:/login";
         }
 
@@ -54,16 +56,17 @@ public class CarritoController {
      * Elimina un producto del carrito.
      */
     @GetMapping("/eliminar/{idTenis}")
-    public String eliminarDelCarrito(@PathVariable("idTenis") Integer idTenis,
+    public String eliminarDelCarrito(@PathVariable("idTenis") Long idTenis,
                                      @SessionAttribute(name = "cliente", required = false) Cliente cliente,
                                      RedirectAttributes ra) {
+
         if (cliente == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión para modificar el carrito.");
             return "redirect:/login";
         }
 
         try {
-            carritoService.eliminarProducto(cliente, idTenis);
+            carritoService.eliminarProducto(cliente, idTenis.intValue());
             ra.addFlashAttribute("ok", "Producto eliminado del carrito.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -78,6 +81,7 @@ public class CarritoController {
     @GetMapping("/vaciar")
     public String vaciarCarrito(@SessionAttribute(name = "cliente", required = false) Cliente cliente,
                                 RedirectAttributes ra) {
+
         if (cliente == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión para vaciar el carrito.");
             return "redirect:/login";
@@ -93,8 +97,8 @@ public class CarritoController {
      */
     @PostMapping("/confirmar")
     public String confirmarCompra(@SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                                  Model model,
                                   RedirectAttributes ra) {
+
         if (cliente == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión para confirmar la compra.");
             return "redirect:/login";

@@ -6,9 +6,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ProyectoTenis.demo.domain.Tenis;
-import com.ProyectoTenis.demo.domain.Categoria;
 import com.ProyectoTenis.demo.service.TenisService;
 import com.ProyectoTenis.demo.service.CategoriaService;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -23,13 +23,13 @@ public class AdminTenisController {
     @Autowired
     private CategoriaService categoriaService;
 
-    /**
-     * Muestra la lista de todos los tenis registrados.
-     */
+    /** LISTAR TENIS */
     @GetMapping
-    public String listarTenis(@SessionAttribute(name = "admin", required = false) Object admin,
-                              Model model,
-                              RedirectAttributes ra) {
+    public String listarTenis(
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            Model model,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
@@ -37,16 +37,16 @@ public class AdminTenisController {
 
         List<Tenis> tenisList = tenisService.listarTenis();
         model.addAttribute("tenisList", tenisList);
-        return "admin/tenis_list"; // plantilla admin/tenis_list.html
+        return "admin/tenis_list";
     }
 
-    /**
-     * Muestra el formulario para agregar un nuevo tenis.
-     */
+    /** FORMULARIO NUEVO TENIS */
     @GetMapping("/nuevo")
-    public String nuevoTenis(@SessionAttribute(name = "admin", required = false) Object admin,
-                             Model model,
-                             RedirectAttributes ra) {
+    public String nuevoTenis(
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            Model model,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
@@ -54,16 +54,16 @@ public class AdminTenisController {
 
         model.addAttribute("tenis", new Tenis());
         model.addAttribute("categorias", categoriaService.listarCategorias());
-        return "admin/tenis_form"; // plantilla admin/tenis_form.html
+        return "admin/tenis_form";
     }
 
-    /**
-     * Guarda un nuevo tenis o actualiza uno existente.
-     */
+    /** GUARDAR TENIS */
     @PostMapping("/guardar")
-    public String guardarTenis(@SessionAttribute(name = "admin", required = false) Object admin,
-                               @ModelAttribute Tenis tenis,
-                               RedirectAttributes ra) {
+    public String guardarTenis(
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            @ModelAttribute Tenis tenis,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
@@ -79,14 +79,14 @@ public class AdminTenisController {
         return "redirect:/admin/tenis";
     }
 
-    /**
-     * Muestra el formulario para editar un tenis existente.
-     */
+    /** EDITAR TENIS */
     @GetMapping("/editar/{id}")
-    public String editarTenis(@PathVariable("id") Integer idTenis,
-                              @SessionAttribute(name = "admin", required = false) Object admin,
-                              Model model,
-                              RedirectAttributes ra) {
+    public String editarTenis(
+            @PathVariable("id") Long idTenis,
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            Model model,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
@@ -100,16 +100,16 @@ public class AdminTenisController {
 
         model.addAttribute("tenis", tenisOpt.get());
         model.addAttribute("categorias", categoriaService.listarCategorias());
-        return "admin/tenis_form"; // usa misma plantilla para editar
+        return "admin/tenis_form";
     }
 
-    /**
-     * Elimina un tenis por ID.
-     */
+    /** ELIMINAR TENIS */
     @GetMapping("/eliminar/{id}")
-    public String eliminarTenis(@PathVariable("id") Integer idTenis,
-                                @SessionAttribute(name = "admin", required = false) Object admin,
-                                RedirectAttributes ra) {
+    public String eliminarTenis(
+            @PathVariable("id") Long idTenis,
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";

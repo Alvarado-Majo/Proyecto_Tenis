@@ -2,8 +2,10 @@ package com.ProyectoTenis.demo.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -31,5 +33,6 @@ public class OrdenDetalle implements Serializable {
 
     @NotNull
     @Column(name = "precio_unit", nullable = false)
-    private Double precioUnit;
+    private BigDecimal precioUnit;
+
 }

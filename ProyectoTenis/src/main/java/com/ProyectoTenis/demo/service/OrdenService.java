@@ -6,7 +6,7 @@ import com.ProyectoTenis.demo.domain.*;
 import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
 import com.ProyectoTenis.demo.repository.OrdenDetalleRepository;
 import com.ProyectoTenis.demo.repository.OrdenRepository;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,11 +27,10 @@ public class OrdenService {
     private CarritoService carritoService;
 
     /**
-     * Crea una orden a partir del carrito activo del cliente.
-     * Genera los detalles y calcula el total automáticamente.
+     * Crea una orden completa a partir del carrito activo.
      */
     public Orden crearOrden(Cliente cliente) {
-        // Obtener el carrito activo del cliente
+
         Carrito carrito = carritoService.obtenerCarritoActivo(cliente);
         List<CarritoDetalle> detallesCarrito = carritoDetalleRepository.findByCarrito(carrito);
 
@@ -39,34 +38,31 @@ public class OrdenService {
             throw new IllegalStateException("El carrito está vacío. No se puede generar la orden.");
         }
 
-        // Calcular total
-        BigDecimal total = detallesCarrito.stream()
-                .map(cd -> cd.getPrecio_unit().multiply(BigDecimal.valueOf(cd.getCantidad())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Calcular total con Double
+        double total = detallesCarrito.stream()
+                .mapToDouble(cd -> cd.getPrecioUnit() * cd.getCantidad())
+                .sum();
 
-        // Crear la orden
+        // Crear Orden
         Orden orden = new Orden();
         orden.setCliente(cliente);
-        orden.setFecha(LocalDateTime.now());
+        orden.setFecha(LocalDateTime.now().toString()); // porque tu campo es String
         orden.setEstado("PENDIENTE");
         orden.setTotal(total);
         orden = ordenRepository.save(orden);
 
-        // Crear los detalles asociados
+        // Crear detalles
         for (CarritoDetalle cd : detallesCarrito) {
             OrdenDetalle od = new OrdenDetalle();
             od.setOrden(orden);
             od.setTenis(cd.getTenis());
             od.setCantidad(cd.getCantidad());
-            od.setPrecio_unit(cd.getPrecio_unit());
+            od.setPrecioUnit(cd.getPrecioUnit());
             ordenDetalleRepository.save(od);
         }
 
-        // Marcar el carrito como PAGADO
-        carrito.setEstado("PAGADO");
+        // Cerrar carrito y eliminar contenido
         carritoService.cerrarCarrito(cliente);
-
-        // Vaciar el carrito
         carritoDetalleRepository.deleteAll(detallesCarrito);
 
         return orden;
@@ -80,16 +76,16 @@ public class OrdenService {
     }
 
     /**
-     * Busca una orden por su ID.
+     * Busca una orden por ID.
      */
-    public Optional<Orden> buscarPorId(Integer idOrden) {
+    public Optional<Orden> buscarPorId(Long idOrden) {
         return ordenRepository.findById(idOrden);
     }
 
     /**
-     * Cambia el estado de una orden (por ejemplo: PAGADA, CANCELADA).
+     * Cambia el estado de una orden.
      */
-    public void cambiarEstado(Integer idOrden, String nuevoEstado) {
+    public void cambiarEstado(Long idOrden, String nuevoEstado) {
         Orden orden = ordenRepository.findById(idOrden)
                 .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada."));
         orden.setEstado(nuevoEstado.toUpperCase());
@@ -97,12 +93,12 @@ public class OrdenService {
     }
 
     /**
-     * Calcula el total de una orden según sus detalles.
+     * Calcula el total de la orden usando Double.
      */
-    public BigDecimal calcularTotal(Orden orden) {
+    public double calcularTotal(Orden orden) {
         List<OrdenDetalle> detalles = ordenDetalleRepository.findByOrden(orden);
         return detalles.stream()
-                .map(d -> d.getPrecio_unit().multiply(BigDecimal.valueOf(d.getCantidad())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .mapToDouble(d -> d.getPrecioUnit() * d.getCantidad())
+                .sum();
     }
 }

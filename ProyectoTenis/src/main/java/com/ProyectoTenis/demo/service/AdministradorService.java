@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.ProyectoTenis.demo.domain.Administrador;
 import com.ProyectoTenis.demo.repository.AdministradorRepository;
+
 import java.util.Optional;
 
 @Service
@@ -14,28 +16,26 @@ public class AdministradorService {
     @Autowired
     private AdministradorRepository administradorRepository;
 
-    // Instancia del codificador de contraseñas
+    // BCrypt para encriptar contraseñas
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
-     * Registra un nuevo administrador si el usuario no existe.
-     * La contraseña se almacena de forma cifrada.
+     * Registrar un nuevo administrador (nombre de método acorde a tus controladores).
      */
-    public boolean registrarAdministrador(Administrador admin) {
+    public boolean registrar(Administrador admin) {
         Optional<Administrador> existente = administradorRepository.findByUsuario(admin.getUsuario());
         if (existente.isPresent()) {
-            // Ya existe un administrador con este nombre de usuario
-            return false;
+            return false; // Usuario ya existe
         }
-        // Cifrar contraseña antes de guardar
+
+        // Encriptar contraseña
         admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         administradorRepository.save(admin);
         return true;
     }
 
     /**
-     * Valida las credenciales de inicio de sesión del administrador.
-     * Compara la contraseña ingresada con la versión cifrada almacenada.
+     * Validar credenciales del administrador.
      */
     public boolean validarLogin(String usuario, String password) {
         Optional<Administrador> adminOpt = administradorRepository.findByUsuario(usuario);
@@ -43,27 +43,26 @@ public class AdministradorService {
             return false;
         }
 
-        Administrador admin = adminOpt.get();
-        // Compara contraseñas usando BCrypt
-        return passwordEncoder.matches(password, admin.getPassword());
+        Administrador adminBD = adminOpt.get();
+        return passwordEncoder.matches(password, adminBD.getPassword());
     }
 
     /**
-     * Busca un administrador por su nombre de usuario.
+     * Buscar administrador por usuario.
      */
     public Optional<Administrador> buscarPorUsuario(String usuario) {
         return administradorRepository.findByUsuario(usuario);
     }
 
     /**
-     * Obtiene un administrador por su ID.
+     * Buscar por ID (Long según tu modelo).
      */
-    public Optional<Administrador> buscarPorId(Integer id) {
+    public Optional<Administrador> buscarPorId(Long id) {
         return administradorRepository.findById(id);
     }
 
     /**
-     * Lista todos los administradores registrados (opcional).
+     * Listar todos los administradores.
      */
     public Iterable<Administrador> listarAdministradores() {
         return administradorRepository.findAll();

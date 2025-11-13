@@ -1,19 +1,19 @@
 package com.ProyectoTenis.demo.controller;
 
+import com.ProyectoTenis.demo.domain.Cliente;
+import com.ProyectoTenis.demo.domain.Administrador;
+import com.ProyectoTenis.demo.service.ClienteService;
+import com.ProyectoTenis.demo.service.AdministradorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.ProyectoTenis.demo.domain.Administrador;
-import com.ProyectoTenis.demo.domain.Cliente;
-import com.ProyectoTenis.demo.service.AdministradorService;
-import com.ProyectoTenis.demo.service.ClienteService;
-import java.util.Optional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.support.SessionStatus;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
-@SessionAttributes({"cliente", "admin"})
 @RequestMapping("/login")
+@SessionAttributes({"cliente", "admin"})
 public class LoginController {
 
     @Autowired
@@ -23,62 +23,64 @@ public class LoginController {
     private AdministradorService administradorService;
 
     /**
-     * Muestra el formulario de inicio de sesión.
+     * Formulario de login
      */
-    @GetMapping
-    public String mostrarLogin(Model model) {
+    @GetMapping("")
+    public String loginForm(Model model) {
         model.addAttribute("cliente", new Cliente());
         model.addAttribute("admin", new Administrador());
-        return "login"; // plantilla login.html
+        return "login";
     }
 
     /**
-     * Procesa el inicio de sesión para cliente.
+     * Login de cliente
      */
     @PostMapping("/cliente")
-    public String loginCliente(@ModelAttribute Cliente cliente,
-                               Model model,
-                               RedirectAttributes ra) {
-        Optional<Cliente> clienteOpt = clienteService.buscarPorCorreoYPassword(
-                cliente.getCorreo(), cliente.getPassword());
+    public String loginCliente(
+            @ModelAttribute Cliente cliente,
+            Model model
+    ) {
+        boolean valido = clienteService.validarLogin(cliente.getCorreo(), cliente.getPassword());
 
-        if (clienteOpt.isPresent()) {
-            model.addAttribute("cliente", clienteOpt.get());
-            ra.addFlashAttribute("ok", "Bienvenido, " + clienteOpt.get().getNombre());
-            return "redirect:/";
+        if (!valido) {
+            model.addAttribute("errorCliente", "Correo o contraseña incorrectos.");
+            return "login";
         }
 
-        ra.addFlashAttribute("error", "Correo o contraseña incorrectos.");
-        return "redirect:/login";
+        Cliente clienteBD = clienteService.buscarPorCorreo(cliente.getCorreo()).get();
+        model.addAttribute("cliente", clienteBD); // Sesión Cliente
+
+        return "redirect:/";
     }
 
     /**
-     * Procesa el inicio de sesión para administrador.
+     * Login de administrador
      */
     @PostMapping("/admin")
-    public String loginAdmin(@ModelAttribute Administrador admin,
-                             Model model,
-                             RedirectAttributes ra) {
-        Optional<Administrador> adminOpt = administradorService.buscarPorUsuarioYPassword(
-                admin.getUsuario(), admin.getPassword());
+    public String loginAdmin(
+            @ModelAttribute Administrador admin,
+            Model model
+    ) {
+        boolean valido = administradorService.validarLogin(admin.getUsuario(), admin.getPassword());
 
-        if (adminOpt.isPresent()) {
-            model.addAttribute("admin", adminOpt.get());
-            ra.addFlashAttribute("ok", "Administrador " + adminOpt.get().getUsuario() + " conectado.");
-            return "redirect:/admin/dashboard";
+        if (!valido) {
+            model.addAttribute("errorAdmin", "Usuario o contraseña incorrectos.");
+            return "login";
         }
 
-        ra.addFlashAttribute("error", "Credenciales de administrador inválidas.");
-        return "redirect:/login";
+        Administrador adminBD = administradorService.buscarPorUsuario(admin.getUsuario()).get();
+        model.addAttribute("admin", adminBD); // Sesión Admin
+
+        return "redirect:/admin";
     }
 
     /**
-     * Cierra la sesión de cliente o administrador.
+     * Logout general
      */
     @GetMapping("/logout")
-    public String cerrarSesion(SessionStatus status, RedirectAttributes ra) {
+    public String logout(SessionStatus status, HttpSession session) {
         status.setComplete();
-        ra.addFlashAttribute("ok", "Sesión cerrada correctamente.");
-        return "redirect:/";
+        session.invalidate();
+        return "redirect:/login";
     }
 }

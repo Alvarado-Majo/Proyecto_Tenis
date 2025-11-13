@@ -3,8 +3,10 @@ package com.ProyectoTenis.demo.service;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
 import com.ProyectoTenis.demo.domain.Categoria;
 import com.ProyectoTenis.demo.repository.CategoriaRepository;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -22,20 +24,21 @@ public class CategoriaService {
     /* ===========================
        Consultas / Listados
        =========================== */
-    @Transactional
+
     public List<Categoria> listarCategorias() {
         return categoriaRepository.findAll();
     }
 
-    @Transactional
-    public Optional<Categoria> buscarPorId(Integer id) {
+    public Optional<Categoria> buscarPorId(Long id) {
         return categoriaRepository.findById(id);
     }
 
-    @Transactional
     public Optional<Categoria> buscarPorNombre(String nombre) {
         if (nombre == null) return Optional.empty();
-        return categoriaRepository.findByNombre(normalizar(nombre));
+
+        Categoria encontrado = categoriaRepository.findByNombre(normalizar(nombre));
+
+        return Optional.ofNullable(encontrado);
     }
 
     public boolean existeNombre(String nombre) {
@@ -45,6 +48,7 @@ public class CategoriaService {
     /* ===========================
        Crear / Actualizar
        =========================== */
+
     public Categoria crear(String nombre) {
         validarNombreObligatorio(nombre);
         String normalizado = normalizar(nombre);
@@ -55,18 +59,20 @@ public class CategoriaService {
 
         Categoria categoria = new Categoria();
         categoria.setNombre(normalizado);
+
         return categoriaRepository.save(categoria);
     }
 
-    public Categoria actualizar(Integer id, String nuevoNombre) {
+    public Categoria actualizar(Long id, String nuevoNombre) {
         validarNombreObligatorio(nuevoNombre);
         String normalizado = normalizar(nuevoNombre);
 
         Categoria existente = categoriaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
 
-        // Si el nombre cambia, validar unicidad
-        if (!existente.getNombre().equalsIgnoreCase(normalizado) && existeNombre(normalizado)) {
+        // Validar nombre duplicado si cambió
+        if (!existente.getNombre().equalsIgnoreCase(normalizado)
+                && existeNombre(normalizado)) {
             throw new IllegalArgumentException("Ya existe una categoría con ese nombre.");
         }
 
@@ -77,14 +83,14 @@ public class CategoriaService {
     /* ===========================
        Eliminar
        =========================== */
-    public void eliminar(Integer id) {
+
+    public void eliminar(Long id) {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
 
         try {
             categoriaRepository.delete(categoria);
         } catch (DataIntegrityViolationException ex) {
-            // Ocurre típicamente si hay tenis referenciando la categoría (FK)
             throw new IllegalStateException(
                 "No se puede eliminar la categoría porque tiene productos asociados.", ex
             );
@@ -92,20 +98,21 @@ public class CategoriaService {
     }
 
     /* ===========================
-       Helpers / Validaciones
+       Helpers
        =========================== */
+
     private void validarNombreObligatorio(String nombre) {
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("El nombre de la categoría es obligatorio.");
         }
     }
 
-    /** Normaliza el nombre: trim + colapsar espacios + capitalizar primera letra */
     private String normalizar(String nombre) {
         String trimmed = nombre.trim().replaceAll("\\s+", " ");
         if (trimmed.isEmpty()) return trimmed;
+
         String lower = trimmed.toLowerCase(Locale.ROOT);
-        // Capitaliza la primera letra (opcional, puro estilo)
         return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
     }
+
 }

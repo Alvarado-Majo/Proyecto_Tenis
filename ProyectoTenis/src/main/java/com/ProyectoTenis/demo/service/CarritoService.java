@@ -2,13 +2,13 @@ package com.ProyectoTenis.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.ProyectoTenis.demo.domain.*;
 import com.ProyectoTenis.demo.repository.CarritoRepository;
 import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
 import com.ProyectoTenis.demo.repository.TenisRepository;
-import java.math.BigDecimal;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CarritoService {
@@ -23,63 +23,73 @@ public class CarritoService {
     private TenisRepository tenisRepository;
 
     /**
-     * Obtiene el carrito activo del cliente.
-     * Si no existe, crea uno nuevo automáticamente.
+     * Obtener carrito activo. Si no existe, crearlo.
      */
     public Carrito obtenerCarritoActivo(Cliente cliente) {
-        List<Carrito> carritos = carritoRepository.findByClienteAndEstado(cliente, "ABIERTO");
-        if (carritos.isEmpty()) {
-            Carrito nuevo = new Carrito();
-            nuevo.setCliente(cliente);
-            nuevo.setEstado("ABIERTO");
-            return carritoRepository.save(nuevo);
+
+        Carrito carrito = carritoRepository.findByClienteAndEstado(cliente, "ABIERTO");
+
+        if (carrito == null) {
+            carrito = new Carrito();
+            carrito.setCliente(cliente);
+            carrito.setEstado("ABIERTO");
+            carritoRepository.save(carrito);
         }
-        return carritos.get(0);
+
+        return carrito;
     }
 
     /**
-     * Agrega un producto (tenis) al carrito activo.
-     * Si ya existe, aumenta la cantidad.
+     * Agregar producto al carrito.
      */
     public void agregarProducto(Cliente cliente, Integer idTenis, int cantidad) {
+
         if (cantidad <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero.");
         }
 
         Carrito carrito = obtenerCarritoActivo(cliente);
-        Tenis tenis = tenisRepository.findById(idTenis)
+
+        Tenis tenis = tenisRepository.findById(Long.valueOf(idTenis))
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
 
-        Optional<CarritoDetalle> existenteOpt = carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis);
+        // Buscar si ya existe el producto en el carrito
+        CarritoDetalle existente = carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis);
 
-        if (existenteOpt.isPresent()) {
-            CarritoDetalle existente = existenteOpt.get();
+        if (existente != null) {
+            // Si existe, sumar cantidad
             existente.setCantidad(existente.getCantidad() + cantidad);
             carritoDetalleRepository.save(existente);
         } else {
+            // Si no existe, crear nuevo detalle
             CarritoDetalle nuevo = new CarritoDetalle();
             nuevo.setCarrito(carrito);
             nuevo.setTenis(tenis);
             nuevo.setCantidad(cantidad);
-            nuevo.setPrecio_unit(tenis.getPrecio());
+            nuevo.setPrecioUnit(tenis.getPrecio());
             carritoDetalleRepository.save(nuevo);
         }
     }
 
     /**
-     * Elimina un producto del carrito activo.
+     * Eliminar un producto del carrito.
      */
     public void eliminarProducto(Cliente cliente, Integer idTenis) {
+
         Carrito carrito = obtenerCarritoActivo(cliente);
-        Tenis tenis = tenisRepository.findById(idTenis)
+
+        Tenis tenis = tenisRepository.findById(Long.valueOf(idTenis))
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado."));
 
-        carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis)
-                .ifPresent(carritoDetalleRepository::delete);
+        CarritoDetalle detalle = carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis);
+
+        if (detalle != null) {
+            carritoDetalleRepository.delete(detalle);
+        }
     }
 
     /**
-     * Obtiene los productos del carrito activo.
+     * Listar productos del carrito.
      */
     public List<CarritoDetalle> listarProductos(Cliente cliente) {
         Carrito carrito = obtenerCarritoActivo(cliente);
@@ -87,16 +97,16 @@ public class CarritoService {
     }
 
     /**
-     * Calcula el total del carrito.
+     * Calcular total con Double.
      */
-    public BigDecimal calcularTotal(Cliente cliente) {
+    public double calcularTotal(Cliente cliente) {
         return listarProductos(cliente).stream()
-                .map(cd -> cd.getPrecio_unit().multiply(BigDecimal.valueOf(cd.getCantidad())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .mapToDouble(cd -> cd.getPrecioUnit() * cd.getCantidad())
+                .sum();
     }
 
     /**
-     * Cierra el carrito (marcar como PAGADO).
+     * Cerrar carrito.
      */
     public Carrito cerrarCarrito(Cliente cliente) {
         Carrito carrito = obtenerCarritoActivo(cliente);
@@ -105,7 +115,7 @@ public class CarritoService {
     }
 
     /**
-     * Elimina todo el contenido del carrito actual (opcional).
+     * Vaciar carrito.
      */
     public void vaciarCarrito(Cliente cliente) {
         Carrito carrito = obtenerCarritoActivo(cliente);

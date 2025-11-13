@@ -3,8 +3,10 @@ package com.ProyectoTenis.demo.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.io.Serializable;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -23,8 +25,9 @@ public class Tenis implements Serializable {
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "precio")
-    private Double precio;
+    @NotNull
+    @Column(name = "precio", nullable = false)
+    private BigDecimal precio;
 
     @Size(max = 100)
     @Column(name = "marca", length = 100)

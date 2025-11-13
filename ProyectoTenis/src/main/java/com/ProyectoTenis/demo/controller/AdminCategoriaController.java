@@ -18,13 +18,15 @@ public class AdminCategoriaController {
     @Autowired
     private CategoriaService categoriaService;
 
-    /**
-     * Muestra la lista de categorías existentes.
-     */
+    /* ============================
+       LISTAR
+       ============================ */
     @GetMapping
-    public String listarCategorias(@SessionAttribute(name = "admin", required = false) Object admin,
-                                   Model model,
-                                   RedirectAttributes ra) {
+    public String listarCategorias(
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            Model model,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
@@ -32,77 +34,94 @@ public class AdminCategoriaController {
 
         List<Categoria> categorias = categoriaService.listarCategorias();
         model.addAttribute("categorias", categorias);
-        return "admin/categorias_list"; // plantilla admin/categorias_list.html
+        return "admin/categorias_list";
     }
 
-    /**
-     * Muestra el formulario para crear una nueva categoría.
-     */
+    /* ============================
+       NUEVA
+       ============================ */
     @GetMapping("/nueva")
-    public String nuevaCategoria(@SessionAttribute(name = "admin", required = false) Object admin,
-                                 Model model,
-                                 RedirectAttributes ra) {
+    public String nuevaCategoria(
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            Model model,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
         }
 
         model.addAttribute("categoria", new Categoria());
-        return "admin/categorias_form"; // plantilla admin/categorias_form.html
+        return "admin/categorias_form";
     }
 
-    /**
-     * Guarda una nueva categoría o actualiza una existente.
-     */
+    /* ============================
+       GUARDAR (crear o editar)
+       ============================ */
     @PostMapping("/guardar")
-    public String guardarCategoria(@SessionAttribute(name = "admin", required = false) Object admin,
-                                   @ModelAttribute Categoria categoria,
-                                   RedirectAttributes ra) {
+    public String guardarCategoria(
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            @ModelAttribute Categoria categoria,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
         }
 
         try {
-            categoriaService.guardar(categoria);
-            ra.addFlashAttribute("ok", "Categoría guardada correctamente.");
+            if (categoria.getIdCategoria() == null) {
+                // NUEVA
+                categoriaService.crear(categoria.getNombre());
+                ra.addFlashAttribute("ok", "Categoría creada correctamente.");
+            } else {
+                // EDITAR
+                categoriaService.actualizar(categoria.getIdCategoria(), categoria.getNombre());
+                ra.addFlashAttribute("ok", "Categoría actualizada correctamente.");
+            }
+
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Error al guardar la categoría: " + e.getMessage());
+            ra.addFlashAttribute("error", "Error: " + e.getMessage());
         }
 
         return "redirect:/admin/categorias";
     }
 
-    /**
-     * Muestra el formulario para editar una categoría existente.
-     */
+    /* ============================
+       EDITAR
+       ============================ */
     @GetMapping("/editar/{id}")
-    public String editarCategoria(@PathVariable("id") Integer idCategoria,
-                                  @SessionAttribute(name = "admin", required = false) Object admin,
-                                  Model model,
-                                  RedirectAttributes ra) {
+    public String editarCategoria(
+            @PathVariable("id") Long idCategoria,
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            Model model,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
         }
 
         Optional<Categoria> categoriaOpt = categoriaService.buscarPorId(idCategoria);
+
         if (categoriaOpt.isEmpty()) {
             ra.addFlashAttribute("error", "La categoría no existe.");
             return "redirect:/admin/categorias";
         }
 
         model.addAttribute("categoria", categoriaOpt.get());
-        return "admin/categorias_form"; // reutiliza el mismo formulario
+        return "admin/categorias_form";
     }
 
-    /**
-     * Elimina una categoría existente.
-     */
+    /* ============================
+       ELIMINAR
+       ============================ */
     @GetMapping("/eliminar/{id}")
-    public String eliminarCategoria(@PathVariable("id") Integer idCategoria,
-                                    @SessionAttribute(name = "admin", required = false) Object admin,
-                                    RedirectAttributes ra) {
+    public String eliminarCategoria(
+            @PathVariable("id") Long idCategoria,
+            @SessionAttribute(name = "admin", required = false) Object admin,
+            RedirectAttributes ra) {
+
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
@@ -112,7 +131,7 @@ public class AdminCategoriaController {
             categoriaService.eliminar(idCategoria);
             ra.addFlashAttribute("ok", "Categoría eliminada correctamente.");
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "No se pudo eliminar la categoría: " + e.getMessage());
+            ra.addFlashAttribute("error", "No se pudo eliminar: " + e.getMessage());
         }
 
         return "redirect:/admin/categorias";

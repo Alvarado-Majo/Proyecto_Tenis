@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.ProyectoTenis.demo.domain.Cliente;
 import com.ProyectoTenis.demo.repository.ClienteRepository;
+
 import java.util.Optional;
 
 @Service
@@ -14,28 +16,39 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    // Codificador de contraseñas seguro
+    // Encriptador de contraseñas
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
-     * Registra un nuevo cliente si el correo no existe.
-     * La contraseña se cifra antes de guardarse.
+     * Registrar nuevo cliente (se usa en el controlador).
      */
     public boolean registrarCliente(Cliente cliente) {
         Optional<Cliente> existente = clienteRepository.findByCorreo(cliente.getCorreo());
         if (existente.isPresent()) {
-            // Ya existe un cliente con este correo
-            return false;
+            return false; // ya existe un cliente con ese correo
         }
-        // Cifrar contraseña
+
         cliente.setPassword(passwordEncoder.encode(cliente.getPassword()));
         clienteRepository.save(cliente);
         return true;
     }
 
     /**
-     * Valida el inicio de sesión de un cliente.
-     * Compara el correo y la contraseña (encriptada).
+     * Alias requerido por controladores antiguos.
+     */
+    public boolean registrar(Cliente cliente) {
+        return registrarCliente(cliente);
+    }
+
+    /**
+     * Actualizar perfil del cliente.
+     */
+    public Cliente actualizar(Cliente cliente) {
+        return clienteRepository.save(cliente);
+    }
+
+    /**
+     * Validar inicio de sesión.
      */
     public boolean validarLogin(String correo, String password) {
         Optional<Cliente> clienteOpt = clienteRepository.findByCorreo(correo);
@@ -44,21 +57,20 @@ public class ClienteService {
         }
 
         Cliente cliente = clienteOpt.get();
-        // Verificar si la contraseña coincide con la encriptada
         return passwordEncoder.matches(password, cliente.getPassword());
     }
 
     /**
-     * Busca un cliente por su correo electrónico.
+     * Buscar por correo.
      */
     public Optional<Cliente> buscarPorCorreo(String correo) {
         return clienteRepository.findByCorreo(correo);
     }
 
     /**
-     * Lista o busca cliente por ID (útil en perfil, carrito, etc.)
+     * Buscar por ID (Long, según tu entidad).
      */
-    public Optional<Cliente> buscarPorId(Integer idCliente) {
+    public Optional<Cliente> buscarPorId(Long idCliente) {
         return clienteRepository.findById(idCliente);
     }
 }

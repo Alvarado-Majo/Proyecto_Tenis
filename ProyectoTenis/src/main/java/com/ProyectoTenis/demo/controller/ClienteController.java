@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ProyectoTenis.demo.domain.Cliente;
 import com.ProyectoTenis.demo.service.ClienteService;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/cliente")
@@ -82,16 +81,23 @@ public class ClienteController {
                                    @SessionAttribute(name = "cliente", required = false) Cliente clienteSesion,
                                    Model model,
                                    RedirectAttributes ra) {
+
         if (clienteSesion == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión para actualizar su perfil.");
             return "redirect:/login";
         }
 
         try {
-            clienteActualizado.setId_cliente(clienteSesion.getId_cliente());
+            // Ajuste correcto del ID
+            clienteActualizado.setIdCliente(clienteSesion.getIdCliente());
+
             clienteService.actualizar(clienteActualizado);
-            model.addAttribute("cliente", clienteActualizado); // actualiza sesión
+
+            // actualizar la sesión
+            model.addAttribute("cliente", clienteActualizado);
+
             ra.addFlashAttribute("ok", "Perfil actualizado correctamente.");
+
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Error al actualizar el perfil: " + e.getMessage());
         }

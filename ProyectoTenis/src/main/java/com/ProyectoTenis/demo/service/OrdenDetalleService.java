@@ -17,7 +17,6 @@ public class OrdenDetalleService {
 
     /**
      * Guarda todos los detalles de una orden a partir del carrito del cliente.
-     * Cada producto del carrito se convierte en una línea en la orden.
      */
     public void guardarDetallesDesdeCarrito(List<CarritoDetalle> itemsCarrito, Orden orden) {
         for (CarritoDetalle item : itemsCarrito) {
@@ -25,29 +24,29 @@ public class OrdenDetalleService {
             detalle.setOrden(orden);
             detalle.setTenis(item.getTenis());
             detalle.setCantidad(item.getCantidad());
-            detalle.setPrecio_unit(item.getPrecio_unit());
-            // subtotal calculado automáticamente por la BD o manualmente:
-            // detalle.setSubtotal(item.getPrecio_unit().multiply(BigDecimal.valueOf(item.getCantidad())));
+            detalle.setPrecioUnit(item.getPrecioUnit()); // CORREGIDO
+
             ordenDetalleRepository.save(detalle);
         }
     }
 
     /**
-     * Lista todos los detalles de una orden específica.
+     * Lista todos los detalles de una orden.
      */
     public List<OrdenDetalle> listarPorOrden(Orden orden) {
         return ordenDetalleRepository.findByOrden(orden);
     }
 
     /**
-     * Calcula el subtotal (cantidad * precio_unit) de un detalle.
+     * Calcula el subtotal (cantidad × precioUnit)
      */
     public BigDecimal calcularSubtotal(OrdenDetalle detalle) {
-        return detalle.getPrecio_unit().multiply(BigDecimal.valueOf(detalle.getCantidad()));
+        return BigDecimal.valueOf(detalle.getPrecioUnit())
+                .multiply(BigDecimal.valueOf(detalle.getCantidad()));
     }
 
     /**
-     * Calcula el total de una orden (sumatoria de subtotales).
+     * Calcula el total de una orden sumando todos los subtotales.
      */
     public BigDecimal calcularTotal(Orden orden) {
         List<OrdenDetalle> detalles = listarPorOrden(orden);
@@ -57,7 +56,7 @@ public class OrdenDetalleService {
     }
 
     /**
-     * Elimina todos los detalles de una orden (por ejemplo, si se cancela).
+     * Elimina todos los detalles de la orden.
      */
     public void eliminarPorOrden(Orden orden) {
         List<OrdenDetalle> detalles = listarPorOrden(orden);

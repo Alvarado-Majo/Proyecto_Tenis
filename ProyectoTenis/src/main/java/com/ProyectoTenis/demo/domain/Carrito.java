@@ -2,19 +2,17 @@ package com.ProyectoTenis.demo.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.io.Serializable;
 import lombok.Data;
-import java.time.LocalDate;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "carrito")
 public class Carrito implements Serializable {
 
-    @OneToOne
-    private Orden orden;
-    private double total;
-    private LocalDate fechaCreacion;
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -31,5 +29,8 @@ public class Carrito implements Serializable {
     private String estado; // ABIERTO o PAGADO
 
     @Column(name = "fecha_creacion")
-    private String fechaCreacion;
+    private LocalDateTime fechaCreacion;
+
+    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL)
+    private List<CarritoDetalle> detalles;
 }
