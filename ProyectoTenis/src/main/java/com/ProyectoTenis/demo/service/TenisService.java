@@ -1,59 +1,90 @@
 package com.ProyectoTenis.demo.service;
 
-import com.ProyectoTenis.demo.domain.Tenis;
-import com.ProyectoTenis.demo.repository.TenisRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import practica.practica.domain.Categoria;
+import practica.practica.domain.Tenis;
+import practica.practica.repository.TenisRepository;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class TenisService {
 
-    private final String uploadFolder = "uploads/imagenes/";
-
     @Autowired
     private TenisRepository tenisRepository;
 
-    @Transactional(readOnly = true)
-    public List<Tenis> getTenis() {
+    /**
+     * Ruta donde se guardarán las imágenes subidas.
+     * Puedes cambiarla según tu estructura de proyecto.
+     */
+    private static final String UPLOAD_DIR = "src/main/resources/static/img/";
+
+    /**
+     * Devuelve todos los tenis registrados.
+     */
+    public List<Tenis> listarTenis() {
         return tenisRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Tenis> getTenis(Long id) {
-        return tenisRepository.findById(id);
+    /**
+     * Guarda un nuevo tenis o actualiza uno existente.
+     * Incluye validaciones básicas y manejo de imagen opcional.
+     */
+    public void guardarTenis(Tenis tenis, MultipartFile imagenArchivo) throws IOException {
+        // Validación de precio
+        if (tenis.getPrecio() == null || tenis.getPrecio().doubleValue() <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+        }
+
+        // Validar nombre y categoría
+        if (tenis.getNombre() == null || tenis.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre del tenis es obligatorio.");
+        }
+        if (tenis.getCategoria() == null) {
+            throw new IllegalArgumentException("Debe seleccionar una categoría válida.");
+        }
+
+        // Si se subió una imagen, guardarla en /static/img/
+        if (imagenArchivo != null && !imagenArchivo.isEmpty()) {
+            String nombreArchivo = imagenArchivo.getOriginalFilename();
+            Path ruta = Paths.get(UPLOAD_DIR + nombreArchivo);
+            Files.createDirectories(ruta.getParent());
+            Files.copy(imagenArchivo.getInputStream(), ruta, StandardCopyOption.REPLACE_EXISTING);
+            tenis.setImagen("/img/" + nombreArchivo);
+        }
+
+        tenisRepository.save(tenis);
     }
 
-    @Transactional
-    public void save(Tenis tenis, MultipartFile imagenFile) {
-        tenis = tenisRepository.save(tenis);
-
-        if (imagenFile != null && !imagenFile.isEmpty()) {
-            try {
-                String nombreArchivo = UUID.randomUUID() + "_" + imagenFile.getOriginalFilename();
-                Path ruta = Paths.get(uploadFolder + nombreArchivo);
-                Files.createDirectories(ruta.getParent());
-                imagenFile.transferTo(ruta.toFile());
-
-                tenis.setImagen("/" + uploadFolder + nombreArchivo);
-                tenisRepository.save(tenis);
-            } catch (IOException e) {
-                throw new RuntimeException("Error al guardar la imagen: " + e.getMessage());
-            }
-        }
+    /**
+     * Busca un tenis por su ID.
+     */
+    public Optional<Tenis> buscarPorId(Integer idTenis) {
+        return tenisRepository.findById(idTenis);
     }
 
-    @Transactional
-    public void delete(Long id) {
-        if (!tenisRepository.existsById(id)) {
-            throw new IllegalArgumentException("El tenis con ID " + id + " no existe.");
-        }
-        tenisRepository.deleteById(id);
+    /**
+     * Elimina un tenis del catálogo.
+     */
+    public void eliminarTenis(Integer idTenis) {
+        tenisRepository.deleteById(idTenis);
+    }
+
+    /**
+     * Lista tenis por categoría específica.
+     */
+    public List<Tenis> listarPorCategoria(Categoria categoria) {
+        return tenisRepository.findByCategoria(categoria);
+    }
+
+    /**
+     * Permite buscar tenis por nombre (para el catálogo del cliente).
+     */
+    public List<Tenis> buscarPorNombre(String nombre) {
+        return tenisRepository.findByNombreContainingIgnoreCase(nombre);
     }
 }

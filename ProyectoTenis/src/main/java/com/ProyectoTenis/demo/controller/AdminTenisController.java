@@ -1,18 +1,21 @@
 package com.ProyectoTenis.demo.controller;
 
-import com.ProyectoTenis.demo.domain.Tenis;
-import com.ProyectoTenis.demo.service.CategoriaService;
-import com.ProyectoTenis.demo.service.TenisService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import practica.practica.domain.Tenis;
+import practica.practica.domain.Categoria;
+import practica.practica.service.TenisService;
+import practica.practica.service.CategoriaService;
+
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/tenis")
+@SessionAttributes("admin")
 public class AdminTenisController {
 
     @Autowired
@@ -21,39 +24,105 @@ public class AdminTenisController {
     @Autowired
     private CategoriaService categoriaService;
 
-    @GetMapping("/listado")
-    public String listado(Model model) {
-        var tenis = tenisService.getTenis();
-        model.addAttribute("tenis", tenis);
-        model.addAttribute("totalTenis", tenis.size());
-        return "/admin/tenis/listado";
+    /**
+     * Muestra la lista de todos los tenis registrados.
+     */
+    @GetMapping
+    public String listarTenis(@SessionAttribute(name = "admin", required = false) Object admin,
+                              Model model,
+                              RedirectAttributes ra) {
+        if (admin == null) {
+            ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
+            return "redirect:/login";
+        }
+
+        List<Tenis> tenisList = tenisService.listarTenis();
+        model.addAttribute("tenisList", tenisList);
+        return "admin/tenis_list"; // plantilla admin/tenis_list.html
     }
 
-    @GetMapping("/modificar/{idTenis}")
-    public String modificar(@PathVariable Long idTenis, Model model) {
-        var tenis = (idTenis != 0)
-                ? tenisService.getTenis(idTenis).orElse(new Tenis())
-                : new Tenis();
+    /**
+     * Muestra el formulario para agregar un nuevo tenis.
+     */
+    @GetMapping("/nuevo")
+    public String nuevoTenis(@SessionAttribute(name = "admin", required = false) Object admin,
+                             Model model,
+                             RedirectAttributes ra) {
+        if (admin == null) {
+            ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
+            return "redirect:/login";
+        }
 
-        model.addAttribute("tenis", tenis);
-        model.addAttribute("categorias", categoriaService.getCategorias());
-        return "/admin/tenis/modifica";
+        model.addAttribute("tenis", new Tenis());
+        model.addAttribute("categorias", categoriaService.listarCategorias());
+        return "admin/tenis_form"; // plantilla admin/tenis_form.html
     }
 
+    /**
+     * Guarda un nuevo tenis o actualiza uno existente.
+     */
     @PostMapping("/guardar")
-    public String guardar(@Valid Tenis tenis,
-                          @RequestParam("imagenFile") MultipartFile imagenFile,
-                          RedirectAttributes redirect) {
+    public String guardarTenis(@SessionAttribute(name = "admin", required = false) Object admin,
+                               @ModelAttribute Tenis tenis,
+                               RedirectAttributes ra) {
+        if (admin == null) {
+            ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
+            return "redirect:/login";
+        }
 
-        tenisService.save(tenis, imagenFile);
-        redirect.addFlashAttribute("mensaje", "Producto guardado correctamente");
-        return "redirect:/admin/tenis/listado";
+        try {
+            tenisService.guardar(tenis);
+            ra.addFlashAttribute("ok", "Tenis guardado correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error al guardar el tenis: " + e.getMessage());
+        }
+
+        return "redirect:/admin/tenis";
     }
 
-    @GetMapping("/eliminar/{idTenis}")
-    public String eliminar(@PathVariable Long idTenis, RedirectAttributes redirect) {
-        tenisService.delete(idTenis);
-        redirect.addFlashAttribute("mensaje", "Producto eliminado correctamente");
-        return "redirect:/admin/tenis/listado";
+    /**
+     * Muestra el formulario para editar un tenis existente.
+     */
+    @GetMapping("/editar/{id}")
+    public String editarTenis(@PathVariable("id") Integer idTenis,
+                              @SessionAttribute(name = "admin", required = false) Object admin,
+                              Model model,
+                              RedirectAttributes ra) {
+        if (admin == null) {
+            ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
+            return "redirect:/login";
+        }
+
+        Optional<Tenis> tenisOpt = tenisService.buscarPorId(idTenis);
+        if (tenisOpt.isEmpty()) {
+            ra.addFlashAttribute("error", "El producto no existe.");
+            return "redirect:/admin/tenis";
+        }
+
+        model.addAttribute("tenis", tenisOpt.get());
+        model.addAttribute("categorias", categoriaService.listarCategorias());
+        return "admin/tenis_form"; // usa misma plantilla para editar
+    }
+
+    /**
+     * Elimina un tenis por ID.
+     */
+    @GetMapping("/eliminar/{id}")
+    public String eliminarTenis(@PathVariable("id") Integer idTenis,
+                                @SessionAttribute(name = "admin", required = false) Object admin,
+                                RedirectAttributes ra) {
+        if (admin == null) {
+            ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
+            return "redirect:/login";
+        }
+
+        try {
+            tenisService.eliminar(idTenis);
+            ra.addFlashAttribute("ok", "Producto eliminado correctamente.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "No se pudo eliminar el producto: " + e.getMessage());
+        }
+
+        return "redirect:/admin/tenis";
     }
 }

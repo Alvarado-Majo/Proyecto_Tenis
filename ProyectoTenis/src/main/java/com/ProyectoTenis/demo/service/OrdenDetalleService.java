@@ -1,14 +1,14 @@
 package com.ProyectoTenis.demo.service;
 
-import com.ProyectoTenis.demo.domain.Orden;
-import com.ProyectoTenis.demo.domain.OrdenDetalle;
-import com.ProyectoTenis.demo.domain.Tenis;
-import com.ProyectoTenis.demo.repository.OrdenDetalleRepository;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import practica.practica.domain.Orden;
+import practica.practica.domain.OrdenDetalle;
+import practica.practica.domain.CarritoDetalle;
+import practica.practica.repository.OrdenDetalleRepository;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class OrdenDetalleService {
@@ -16,70 +16,52 @@ public class OrdenDetalleService {
     @Autowired
     private OrdenDetalleRepository ordenDetalleRepository;
 
-    @Transactional(readOnly = true)
-    public List<OrdenDetalle> getDetalles(Orden orden) {
+    /**
+     * Guarda todos los detalles de una orden a partir del carrito del cliente.
+     * Cada producto del carrito se convierte en una línea en la orden.
+     */
+    public void guardarDetallesDesdeCarrito(List<CarritoDetalle> itemsCarrito, Orden orden) {
+        for (CarritoDetalle item : itemsCarrito) {
+            OrdenDetalle detalle = new OrdenDetalle();
+            detalle.setOrden(orden);
+            detalle.setTenis(item.getTenis());
+            detalle.setCantidad(item.getCantidad());
+            detalle.setPrecio_unit(item.getPrecio_unit());
+            // subtotal calculado automáticamente por la BD o manualmente:
+            // detalle.setSubtotal(item.getPrecio_unit().multiply(BigDecimal.valueOf(item.getCantidad())));
+            ordenDetalleRepository.save(detalle);
+        }
+    }
+
+    /**
+     * Lista todos los detalles de una orden específica.
+     */
+    public List<OrdenDetalle> listarPorOrden(Orden orden) {
         return ordenDetalleRepository.findByOrden(orden);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<OrdenDetalle> getDetalle(Long idDetalle) {
-        return ordenDetalleRepository.findById(idDetalle);
-    }
-    
-    @Transactional
-    public OrdenDetalle addOrUpdateItem(Orden orden, Tenis tenis, Integer cantidad, Double precioUnit) {
-        if (cantidad == null || cantidad <= 0) {
-            cantidad = 1;
-        }
-        if (precioUnit == null) {
-            precioUnit = tenis.getPrecio();
-        }
-
-        OrdenDetalle existente = ordenDetalleRepository.findByOrdenAndTenis(orden, tenis);
-        if (existente == null) {
-            OrdenDetalle nuevo = new OrdenDetalle();
-            nuevo.setOrden(orden);
-            nuevo.setTenis(tenis);
-            nuevo.setCantidad(cantidad);
-            nuevo.setPrecioUnit(precioUnit);
-            return ordenDetalleRepository.save(nuevo);
-        } else {
-            existente.setCantidad(existente.getCantidad() + cantidad);
-            return ordenDetalleRepository.save(existente);
-        }
+    /**
+     * Calcula el subtotal (cantidad * precio_unit) de un detalle.
+     */
+    public BigDecimal calcularSubtotal(OrdenDetalle detalle) {
+        return detalle.getPrecio_unit().multiply(BigDecimal.valueOf(detalle.getCantidad()));
     }
 
-   
-    @Transactional
-    public void save(OrdenDetalle detalle) {
-        ordenDetalleRepository.save(detalle);
+    /**
+     * Calcula el total de una orden (sumatoria de subtotales).
+     */
+    public BigDecimal calcularTotal(Orden orden) {
+        List<OrdenDetalle> detalles = listarPorOrden(orden);
+        return detalles.stream()
+                .map(this::calcularSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    @Transactional
-    public void updateCantidad(Long idDetalle, int nuevaCantidad) {
-        OrdenDetalle det = ordenDetalleRepository.findById(idDetalle).orElseThrow();
-        if (nuevaCantidad <= 0) {
-            ordenDetalleRepository.delete(det);
-        } else {
-            det.setCantidad(nuevaCantidad);
-            ordenDetalleRepository.save(det);
-        }
-    }
-
-    @Transactional
-    public void delete(Long idDetalle) {
-        ordenDetalleRepository.deleteById(idDetalle);
-    }
-
-    @Transactional
-    public void deleteAllByOrden(Orden orden) {
-        List<OrdenDetalle> items = ordenDetalleRepository.findByOrden(orden);
-        ordenDetalleRepository.deleteAll(items);
-    }
-    @Transactional(readOnly = true)
-    public double calcularTotal(Orden orden) {
-        return ordenDetalleRepository.findByOrden(orden).stream()
-                .mapToDouble(d -> d.getCantidad() * d.getPrecioUnit())
-                .sum();
+    /**
+     * Elimina todos los detalles de una orden (por ejemplo, si se cancela).
+     */
+    public void eliminarPorOrden(Orden orden) {
+        List<OrdenDetalle> detalles = listarPorOrden(orden);
+        ordenDetalleRepository.deleteAll(detalles);
     }
 }
