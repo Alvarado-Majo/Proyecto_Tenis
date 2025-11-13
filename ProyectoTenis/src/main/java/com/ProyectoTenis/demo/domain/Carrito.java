@@ -4,12 +4,17 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
 @Entity
 @Table(name = "carrito")
 public class Carrito implements Serializable {
 
+    @OneToOne
+    private Orden orden;
+    private double total;
+    private LocalDate fechaCreacion;
     private static final long serialVersionUID = 1L;
 
     @Id

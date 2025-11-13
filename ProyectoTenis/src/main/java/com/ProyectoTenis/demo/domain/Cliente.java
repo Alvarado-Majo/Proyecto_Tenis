@@ -5,11 +5,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import lombok.Data;
+import java.util.List;
+
 
 @Data
 @Entity
 @Table(name = "cliente")
 public class Cliente implements Serializable {
+    @OneToOne(mappedBy = "cliente")
+    private Carrito carrito;
+
+    @OneToMany(mappedBy = "cliente")
+    private List<Pedido> pedidos;
+
 
     private static final long serialVersionUID = 1L;
 
