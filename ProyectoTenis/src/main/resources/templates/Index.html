@@ -1,15 +1,36 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tenis Shop</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<h1 style="text-align:center; margin-top:25px; color:#FF4FA3;">
+    Catálogo de Tenis
+</h1>
+
+<div style="width:90%; margin:auto; display:grid; grid-template-columns:repeat(3, 1fr); gap:25px; margin-top:30px;">
+
+    <div class="card-tenis" th:each="t : ${tenisList}">
+        <img th:src="${t.imagen}" style="width:100%; height:180px; object-fit:cover; border-radius:10px;">
+
+        <h3 th:text="${t.nombre}" style="color:#FF4FA3;"></h3>
+        <p th:text="${t.marca}"></p>
+        <p style="font-weight:bold; color:#15C7C7;">₡ <span th:text="${t.precio}"></span></p>
+
+        <a th:href="@{'/detalle/' + ${t.idTenis}}" class="btn-turquesa">Ver detalles</a>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
 </html>
