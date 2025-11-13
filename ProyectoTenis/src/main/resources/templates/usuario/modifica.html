@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/plantilla :: header}"></head>
+
+<body>
+    <header th:replace="~{layout/plantilla :: navbar}"></header>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 th:text="${usuario.idUsuario == 0 ? 'Nuevo Usuario' : 'Editar Usuario'}">
+                            Gestión de Usuario
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <form th:action="@{/usuario/guardar}" th:object="${usuario}" method="POST">
+                            
+                            <input type="hidden" th:field="*{idUsuario}" />
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" th:field="*{username}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" th:field="*{password}">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" th:field="*{nombre}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellidos" class="form-label">Apellidos</label>
+                                    <input type="text" class="form-control" th:field="*{apellidos}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="correo" class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" th:field="*{correo}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" th:field="*{telefono}">
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" th:field="*{activo}">
+                                <label class="form-check-label" for="activo">Activo</labe>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                <a th:href="@{/usuario/listado}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layout/plantilla :: footer}"></footer>
+</body>
+</html>
