@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/plantilla :: header}"></head>
+
+<body class="bg-light">
+
+    <div class="container">
+        <div class="row justify-content-center" style="margin-top: 15vh;">
+            <div class="col-md-5">
+                
+                <div class="card shadow-lg">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </h3>
+                        
+                        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                            Usuario o contraseña incorrectos.
+                        </div>
+                        
+                        <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                            Sesión cerrada exitosamente.
+                        </div>
+                        
+                        <form th:action="@{/login}" method="POST">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Usuario (Username)</label>
+                                <input type="text" class="form-control" id="username" name="username" required autofocus>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+                            </div>
+                        </form>
+                        
+                        <hr>
+                        
+                        <div class="text-center">
+                            <p>¿No tienes cuenta?</p>
+                            <a th:href="@{/registro}" class="btn btn-outline-secondary">
+                                <i class="fas fa-user-plus"></i> Registrarse
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="position: fixed; bottom: 0; width: 100%;">
+         <footer th:replace="~{layout/plantilla :: footer}"></footer>
+    </div>
+    
+</body>
+</html>

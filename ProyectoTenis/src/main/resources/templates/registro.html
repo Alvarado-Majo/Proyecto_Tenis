@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/plantilla :: header}"></head>
+
+<body class="bg-light">
+
+    <div class="container">
+        <div class="row justify-content-center" style="margin-top: 5vh; margin-bottom: 5vh;">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="fas fa-user-plus"></i> Registro de Nuevo Usuario
+                        </h3>
+                        
+                        <form th:action="@{/registro}" th:object="${usuario}" method="POST">
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" th:field="*{username}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" th:field="*{password}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" th:field="*{nombre}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="apellidos" class="form-label">Apellidos</label>
+                                    <input type="text" class="form-control" th:field="*{apellidos}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="correo" class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" th:field="*{correo}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="telefono" class="form-label">Teléfono (Opcional)</label>
+                                <input type="tel" class="form-control" th:field="*{telefono}">
+                            </div>
+                            
+                            <input type="hidden" th:field="*{activo}" th:value="true" />
+                            
+                            <hr>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                <a th:href="@{/login}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check"></i> Registrarse
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layout/plantilla :: footer}"></footer>
+</body>
+</html>
