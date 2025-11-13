@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/plantilla :: header}"></head>
+
+<body>
+    <header th:replace="~{layout/plantilla :: navbar}"></header>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3 th:text="${producto.idProducto == 0 ? 'Nuevo Producto' : 'Editar Producto'}">
+                            Gestión de Producto
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <form th:action="@{/producto/guardar}" th:object="${producto}" method="POST">
+                            
+                            <input type="hidden" th:field="*{idProducto}" />
+                            
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre del Producto</label>
+                                <input type="text" class="form-control" th:field="*{nombre}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" th:field="*{descripcion}" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="precio" class="form-label">Precio</label>
+                                    <input type="number" class="form-control" th:field="*{precio}" step="0.01" min="0" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="stock" class="form-label">Stock (Inventario)</label>
+                                    <input type="number" class="form-control" th:field="*{stock}" min="0" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="rutaImagen" class="form-label">URL de la Imagen</label>
+                                <input type="text" class="form-control" th:field="*{rutaImagen}">
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" th:field="*{activo}">
+                                <label class="form-check-label" for="activo">Activo</labe>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                <a th:href="@{/producto/listado}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Guardar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layout/plantilla :: footer}"></footer>
+</body>
+</html>

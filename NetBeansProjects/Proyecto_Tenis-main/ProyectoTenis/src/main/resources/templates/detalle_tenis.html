@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalles del Producto</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor-detalle">
+
+    <div class="detalle-card" th:if="${tenis != null}">
+        
+        <img th:src="@{${tenis.imagen}}" class="detalle-img">
+
+        <div class="detalle-info">
+            <h2 th:text="${tenis.nombre}"></h2>
+
+            <p class="precio-detalle">
+                ₡ <span th:text="${tenis.precio}"></span>
+            </p>
+
+            <p><strong>Marca:</strong> <span th:text="${tenis.marca}"></span></p>
+
+            <p><strong>Categoría:</strong> 
+                <span th:text="${tenis.categoria.nombre}"></span>
+            </p>
+
+            <form th:action="@{'/agregar-carrito/' + ${tenis.idTenis}}" method="post">
+                <label>Cantidad:</label>
+                <input type="number" name="cantidad" value="1" min="1" class="input-cantidad">
+
+                <button type="submit" class="btn-agregar">
+                    Agregar al carrito 🛒
+                </button>
+            </form>
+
+            <a href="/" class="btn-volver">Volver al catálogo</a>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
+</html>

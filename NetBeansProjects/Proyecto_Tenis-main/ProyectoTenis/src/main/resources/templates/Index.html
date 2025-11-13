@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tenis Shop</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<!-- ✨ Navbar -->
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor">
+
+    <h1 class="titulo">Catálogo de Tenis</h1>
+
+    <!-- 🔍 FILTROS -->
+    <div class="filtros">
+        <form method="get" action="/" style="display:inline;">
+        
+            <select name="categoria">
+                <option value="">Todas las categorías</option>
+                <option th:each="cat : ${categorias}"
+                        th:value="${cat.idCategoria}"
+                        th:text="${cat.nombre}"
+                        th:selected="${idCategoria == cat.idCategoria}">
+                </option>
+            </select>
+
+            <input type="text" name="buscar" placeholder="Buscar..."
+                   th:value="${buscar}" />
+
+            <button type="submit">Filtrar</button>
+        </form>
+    </div>
+
+    <!-- 🛒 CATALOGO -->
+    <div class="catalogo">
+        <div class="card" th:each="tenis : ${tenisList}">
+        
+            <img th:src="@{${tenis.imagen}}" alt="Imagen del tenis">
+
+            <h3 th:text="${tenis.nombre}"></h3>
+
+            <p>₡ <span th:text="${tenis.precio}"></span></p>
+
+            <a th:href="@{'/detalle/' + ${tenis.idTenis}}"
+               class="btn-comprar">Ver Detalles</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- ✨ Footer -->
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
+</html>

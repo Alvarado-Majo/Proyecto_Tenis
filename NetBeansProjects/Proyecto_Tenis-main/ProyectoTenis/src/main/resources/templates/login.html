@@ -1,0 +1,48 @@
+<<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor-login">
+
+    <div class="login-box">
+        <h2>Iniciar Sesión</h2>
+
+        <div th:if="${errorCliente}" class="alerta-error" th:text="${errorCliente}"></div>
+        <div th:if="${errorAdmin}" class="alerta-error" th:text="${errorAdmin}"></div>
+
+        <h3>Cliente</h3>
+        <form action="/login/cliente" method="post">
+
+            <input type="email" name="correo" placeholder="Correo" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+
+            <button type="submit" class="btn-login">Ingresar</button>
+        </form>
+
+        <hr>
+
+        <h3>Administrador</h3>
+        <form action="/login/admin" method="post">
+
+            <input type="text" name="usuario" placeholder="Usuario" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+
+            <button type="submit" class="btn-login-rosa">Admin Login</button>
+        </form>
+
+    </div>
+</div>
+
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
+</html>

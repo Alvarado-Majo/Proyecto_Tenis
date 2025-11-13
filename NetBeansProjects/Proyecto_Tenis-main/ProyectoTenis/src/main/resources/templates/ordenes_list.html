@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Órdenes</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor">
+
+    <h1 class="titulo">Mis Órdenes</h1>
+
+    <table class="tabla-ordenes">
+
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="o : ${ordenes}">
+            <td th:text="${o.idOrden}"></td>
+            <td th:text="${o.fecha}"></td>
+            <td>₡ <span th:text="${o.total}"></span></td>
+            <td th:text="${o.estado}"></td>
+            <td>
+                <a th:href="@{'/ordenes/detalle/' + ${o.idOrden}}" class="btn-detalle">Ver</a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>
+
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
+</html>

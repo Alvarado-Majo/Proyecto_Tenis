@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito de Compras</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+<div th:replace="general/fragmentos :: navbar"></div>
+
+<div class="contenedor">
+
+    <h1 class="titulo">Mi Carrito 🛒</h1>
+
+    <div th:if="${detalles.isEmpty()}">
+        <p class="mensaje-vacio">Tu carrito está vacío.</p>
+        <a href="/" class="btn-volver">Ir al catálogo</a>
+    </div>
+
+    <table th:if="${!detalles.isEmpty()}" class="tabla-carrito">
+        <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cant</th>
+            <th>Subtotal</th>
+            <th></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="d : ${detalles}">
+            <td th:text="${d.tenis.nombre}"></td>
+            <td>₡ <span th:text="${d.precioUnit}"></span></td>
+            <td th:text="${d.cantidad}"></td>
+            <td>₡ <span th:text="${d.precioUnit * d.cantidad}"></span></td>
+            <td>
+                <a th:href="@{'/carrito/eliminar/' + ${d.tenis.idTenis}}" class="btn-eliminar">
+                    X
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${!detalles.isEmpty()}" class="total-carrito">
+        Total: ₡ <span th:text="${total}"></span>
+    </div>
+
+    <div th:if="${!detalles.isEmpty()}" class="acciones-carrito">
+        <a href="/carrito/vaciar" class="btn-vaciar">Vaciar Carrito</a>
+        <a href="/ordenes/crear" class="btn-comprar">Finalizar compra</a>
+    </div>
+
+</div>
+
+<div th:replace="general/fragmentos :: footer"></div>
+
+</body>
+</html>
