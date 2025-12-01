@@ -8,6 +8,9 @@ public interface TenisRepository extends JpaRepository<Tenis, Long> {
 
     Tenis findByNombre(String nombre);
     
+    
+    List<Tenis> findByCategoria(Categoria categoria);
+    
     List<Tenis> findByNombreContaining(String nombre);
 
     List<Tenis> findByMarca(String marca);
