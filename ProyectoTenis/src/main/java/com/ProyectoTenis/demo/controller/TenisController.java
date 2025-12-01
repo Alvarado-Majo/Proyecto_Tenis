@@ -3,6 +3,7 @@
 package com.ProyectoTenis.demo.controller;
 
 import com.ProyectoTenis.demo.domain.Categoria;
+import com.ProyectoTenis.demo.domain.Tenis;
 import com.ProyectoTenis.demo.repository.CategoriaRepository;
 import com.ProyectoTenis.demo.repository.TenisRepository;
 import org.springframework.beans.factory.annotation.Autowired;

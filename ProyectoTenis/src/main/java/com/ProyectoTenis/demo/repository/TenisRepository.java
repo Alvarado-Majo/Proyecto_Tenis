@@ -1,5 +1,6 @@
 package com.ProyectoTenis.demo.repository;
 
+import com.ProyectoTenis.demo.domain.Categoria;
 import com.ProyectoTenis.demo.domain.Tenis;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
