@@ -1,15 +1,19 @@
 package com.ProyectoTenis.demo.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.ProyectoTenis.demo.domain.*;
+import com.ProyectoTenis.demo.domain.Carrito;
+import com.ProyectoTenis.demo.domain.CarritoDetalle;
+import com.ProyectoTenis.demo.domain.Orden;
+import com.ProyectoTenis.demo.domain.OrdenDetalle;
 import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
+import com.ProyectoTenis.demo.repository.CarritoRepository;
 import com.ProyectoTenis.demo.repository.OrdenDetalleRepository;
 import com.ProyectoTenis.demo.repository.OrdenRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class OrdenService {
@@ -21,75 +25,59 @@ public class OrdenService {
     private OrdenDetalleRepository ordenDetalleRepository;
 
     @Autowired
-    private CarritoDetalleRepository carritoDetalleRepository;
+    private CarritoRepository carritoRepository;
 
     @Autowired
-    private CarritoService carritoService;
+    private CarritoDetalleRepository carritoDetalleRepository;
 
     /**
-     * Crear una orden desde el carrito.
+     * Crear la orden a partir del carrito del cliente.
      */
-    public Orden crearOrden(Cliente cliente) {
+    @Transactional
+    public Orden procesarCompra(Carrito carrito) {
+        // Obtener detalles del carrito
+        List<CarritoDetalle> detalles = carritoDetalleRepository.findByCarrito(carrito);
 
-        Carrito carrito = carritoService.obtenerCarritoActivo(cliente);
-        List<CarritoDetalle> detallesCarrito = carritoDetalleRepository.findByCarrito(carrito);
-
-        if (detallesCarrito.isEmpty()) {
-            throw new IllegalStateException("El carrito está vacío.");
+        if (detalles.isEmpty()) {
+            throw new IllegalStateException("El carrito está vacío. No se puede procesar la compra.");
         }
 
-        // Calcular total con Double
-        double total = detallesCarrito.stream()
-                .mapToDouble(cd -> cd.getPrecioUnit().doubleValue() * cd.getCantidad())
+        // Calcular total
+        double total = detalles.stream()
+                .mapToDouble(d -> d.getCantidad() * d.getPrecioUnitario())
                 .sum();
 
-        // Crear orden
+        // Crear la orden
         Orden orden = new Orden();
-        orden.setCliente(cliente);
-        orden.setFecha(LocalDateTime.now()); // OK porque tu campo es LocalDateTime
-        orden.setEstado("PENDIENTE");
+        orden.setCliente(carrito.getCliente());
         orden.setTotal(total);
+        orden.setEstado("PAGADA");
+        orden.setFechaCreacion(LocalDateTime.now());
+
+        // Opcional: usar la dirección del cliente como dirección de envío
+        if (carrito.getCliente() != null) {
+            orden.setDireccionEnvio(carrito.getCliente().getDireccion());
+        }
 
         orden = ordenRepository.save(orden);
 
-        // Crear detalles de la orden
-        for (CarritoDetalle cd : detallesCarrito) {
+        // Crear los detalles de la orden
+        for (CarritoDetalle d : detalles) {
             OrdenDetalle od = new OrdenDetalle();
             od.setOrden(orden);
-            od.setTenis(cd.getTenis());
-            od.setCantidad(cd.getCantidad());
-            od.setPrecioUnit(cd.getPrecioUnit()); // BigDecimal está bien
+            od.setTenis(d.getTenis());
+            od.setCantidad(d.getCantidad());
+            od.setPrecioUnitario(d.getPrecioUnitario());
+            od.setSubtotal(d.getCantidad() * d.getPrecioUnitario());
+
             ordenDetalleRepository.save(od);
         }
 
-        // Cerrar carrito y vaciarlo
-        carritoService.cerrarCarrito(cliente);
-        carritoDetalleRepository.deleteAll(detallesCarrito);
+        // Vaciar carrito
+        carritoDetalleRepository.deleteAll(detalles);
+        carrito.setTotal(0.0);
+        carritoRepository.save(carrito);
 
         return orden;
-    }
-
-    public Optional<Orden> buscarPorId(Long idOrden) {
-        return ordenRepository.findById(idOrden);
-    }
-
-    public List<Orden> listarPorCliente(Cliente cliente) {
-        return ordenRepository.findByCliente(cliente);
-    }
-
-    public void cambiarEstado(Long idOrden, String nuevoEstado) {
-        Orden orden = ordenRepository.findById(idOrden)
-                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
-
-        orden.setEstado(nuevoEstado.toUpperCase());
-        ordenRepository.save(orden);
-    }
-
-    public double calcularTotal(Orden orden) {
-        List<OrdenDetalle> detalles = ordenDetalleRepository.findByOrden(orden);
-
-        return detalles.stream()
-                .mapToDouble(d -> d.getPrecioUnit().doubleValue() * d.getCantidad())
-                .sum();
     }
 }

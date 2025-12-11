@@ -1,13 +1,15 @@
 package com.ProyectoTenis.demo.controller;
 
+import com.ProyectoTenis.demo.domain.Tenis;
+import com.ProyectoTenis.demo.service.CategoriaService;
+import com.ProyectoTenis.demo.service.TenisService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.ProyectoTenis.demo.domain.Tenis;
-import com.ProyectoTenis.demo.service.TenisService;
-import com.ProyectoTenis.demo.service.CategoriaService;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,16 +59,24 @@ public class AdminTenisController {
         return "admin/tenis_form";
     }
 
-    /** GUARDAR TENIS */
+    /** GUARDAR TENIS (CREAR / EDITAR) */
     @PostMapping("/guardar")
     public String guardarTenis(
             @SessionAttribute(name = "admin", required = false) Object admin,
-            @ModelAttribute Tenis tenis,
+            @Valid @ModelAttribute("tenis") Tenis tenis,
+            BindingResult result,
+            Model model,
             RedirectAttributes ra) {
 
         if (admin == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión como administrador.");
             return "redirect:/login";
+        }
+
+        // Validaciones de Bean Validation
+        if (result.hasErrors()) {
+            model.addAttribute("categorias", categoriaService.listarCategorias());
+            return "admin/tenis_form";
         }
 
         try {

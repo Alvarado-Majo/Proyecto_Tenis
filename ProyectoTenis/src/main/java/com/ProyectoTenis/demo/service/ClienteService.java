@@ -1,75 +1,52 @@
 package com.ProyectoTenis.demo.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.ProyectoTenis.demo.domain.Cliente;
 import com.ProyectoTenis.demo.repository.ClienteRepository;
-
-import java.util.Optional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public ClienteService(ClienteRepository clienteRepository,
+                          BCryptPasswordEncoder passwordEncoder) {
+        this.clienteRepository = clienteRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-    /**
-     * Registrar nuevo cliente
-     */
-    public boolean registrarCliente(Cliente cliente) {
-        Optional<Cliente> existente = clienteRepository.findByCorreo(cliente.getCorreo());
-        if (existente.isPresent()) {
-            return false;
+    public Cliente guardar(Cliente cliente) {
+        if (cliente.getPassword() != null && !cliente.getPassword().isBlank()) {
+            cliente.setPassword(passwordEncoder.encode(cliente.getPassword()));
         }
-
-        cliente.setPassword(passwordEncoder.encode(cliente.getPassword()));
-        clienteRepository.save(cliente);
-        return true;
-    }
-
-    /**
-     * Alias para el controlador antiguo
-     */
-    public boolean registrar(Cliente cliente) {
-        return registrarCliente(cliente);
-    }
-
-    /**
-     * Actualizar datos del cliente
-     */
-    public Cliente actualizar(Cliente cliente) {
         return clienteRepository.save(cliente);
     }
 
-    /**
-     * Validación de login
-     */
-    public boolean validarLogin(String correo, String password) {
-        Optional<Cliente> clienteOpt = clienteRepository.findByCorreo(correo);
-        if (clienteOpt.isEmpty()) {
+    // Compatibilidad con código viejo
+    public boolean registrar(Cliente cliente) {
+        guardar(cliente);
+        return true;
+    }
+
+    public Cliente actualizar(Cliente cliente) {
+        return guardar(cliente);
+    }
+
+    public Cliente buscarPorEmail(String email) {
+        return clienteRepository.findByEmail(email).orElse(null);
+    }
+
+    public Cliente buscarPorId(Long id) {
+        return clienteRepository.findById(id).orElse(null);
+    }
+
+    // 👇 Nuevo método para validar correos duplicados
+    public boolean existeEmail(String email) {
+        if (email == null || email.isBlank()) {
             return false;
         }
-
-        Cliente cliente = clienteOpt.get();
-        return passwordEncoder.matches(password, cliente.getPassword());
-    }
-
-    /**
-     * Buscar cliente por correo
-     */
-    public Optional<Cliente> buscarPorCorreo(String correo) {
-        return clienteRepository.findByCorreo(correo);
-    }
-
-    /**
-     * Buscar cliente por ID
-     */
-    public Optional<Cliente> buscarPorId(Long idCliente) {
-        return clienteRepository.findById(idCliente);
+        return clienteRepository.findByEmail(email).isPresent();
     }
 }

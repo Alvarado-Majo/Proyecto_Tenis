@@ -2,22 +2,17 @@ package com.ProyectoTenis.demo.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
-
+import jakarta.validation.constraints.Positive;
 import java.io.Serializable;
-import java.math.BigDecimal;
 
-@Data
 @Entity
 @Table(name = "orden_detalle")
 public class OrdenDetalle implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_detalle")
-    private Long idDetalle;
+    @Column(name = "id_detalle")  // 👈 coincide con la BD
+    private Long idOrdenDetalle;
 
     @ManyToOne
     @JoinColumn(name = "id_orden", nullable = false)
@@ -27,11 +22,68 @@ public class OrdenDetalle implements Serializable {
     @JoinColumn(name = "id_tenis", nullable = false)
     private Tenis tenis;
 
-    @NotNull
-    @Column(name = "cantidad", nullable = false)
+    @NotNull(message = "La cantidad es obligatoria")
+    @Positive(message = "La cantidad debe ser mayor a 0")
     private Integer cantidad;
 
-    @NotNull
-    @Column(name = "precio_unit", nullable = false)
-    private BigDecimal precioUnit;
+    @NotNull(message = "El precio unitario es obligatorio")
+    @Positive(message = "El precio unitario debe ser mayor a 0")
+    @Column(name = "precio_unit")   // 👈 igual que en la tabla
+    private Double precioUnitario;
+
+    @NotNull(message = "El subtotal es obligatorio")
+    @Positive(message = "El subtotal debe ser mayor a 0")
+    private Double subtotal;
+
+    public OrdenDetalle() {
+    }
+
+    public Long getIdOrdenDetalle() {
+        return idOrdenDetalle;
+    }
+
+    public void setIdOrdenDetalle(Long idOrdenDetalle) {
+        this.idOrdenDetalle = idOrdenDetalle;
+    }
+
+    public Orden getOrden() {
+        return orden;
+    }
+
+    public void setOrden(Orden orden) {
+        this.orden = orden;
+    }
+
+    public Tenis getTenis() {
+        return tenis;
+    }
+
+    public void setTenis(Tenis tenis) {
+        this.tenis = tenis;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public Double getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(Double precioUnitario) {
+        this.precioUnitario = precioUnitario;
+    }
+
+    public Double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(Double subtotal) {
+        this.subtotal = subtotal;
+    }
 }
+

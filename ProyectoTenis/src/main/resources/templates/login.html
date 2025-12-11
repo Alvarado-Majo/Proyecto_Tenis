@@ -1,48 +1,90 @@
-<<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <style>
+        .form-box {
+            max-width: 450px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--turquesa);
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--turquesa);
+        }
+        .btn-enviar {
+            width: 100%;
+            background: var(--rosado);
+            border: none;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-enviar:hover {
+            background: var(--turquesa);
+        }
+        .alert-ok {
+            background: #d4f7df;
+            padding: 10px;
+            border-left: 4px solid #34a853;
+            margin-bottom: 15px;
+        }
+        .alert-error {
+            background: #fde2e2;
+            padding: 10px;
+            border-left: 4px solid #d93025;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div th:replace="general/fragmentos :: navbar"></div>
+<div class="form-box">
 
-<div class="contenedor-login">
+    <h1>Iniciar Sesión</h1>
 
-    <div class="login-box">
-        <h2>Iniciar Sesión</h2>
+    <!-- Mensaje de éxito -->
+    <div th:if="${ok}" class="alert-ok" th:text="${ok}"></div>
 
-        <div th:if="${errorCliente}" class="alerta-error" th:text="${errorCliente}"></div>
-        <div th:if="${errorAdmin}" class="alerta-error" th:text="${errorAdmin}"></div>
+    <!-- Mensaje de error -->
+    <div th:if="${error}" class="alert-error" th:text="${error}"></div>
 
-        <h3>Cliente</h3>
-        <form action="/login/cliente" method="post">
+    <form th:action="@{/login}" method="post">
 
-            <input type="email" name="correo" placeholder="Correo" required>
-            <input type="password" name="password" placeholder="Contraseña" required>
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" required>
 
-            <button type="submit" class="btn-login">Ingresar</button>
-        </form>
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" required>
 
-        <hr>
+        <button type="submit" class="btn-enviar">Entrar</button>
+    </form>
 
-        <h3>Administrador</h3>
-        <form action="/login/admin" method="post">
-
-            <input type="text" name="usuario" placeholder="Usuario" required>
-            <input type="password" name="password" placeholder="Contraseña" required>
-
-            <button type="submit" class="btn-login-rosa">Admin Login</button>
-        </form>
-
-    </div>
+    <p style="margin-top:15px; text-align:center;">
+        ¿No tienes cuenta?
+        <a th:href="@{/registro}">Regístrate aquí</a>
+    </p>
 </div>
-
-<div th:replace="general/fragmentos :: footer"></div>
 
 </body>
 </html>

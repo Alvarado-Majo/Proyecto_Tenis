@@ -1,21 +1,21 @@
-package com.ProyectoTenis.demo.controller;
+package com.ProyectoTenis.demo.controller.cliente;
+
+import com.ProyectoTenis.demo.domain.Carrito;
+import com.ProyectoTenis.demo.domain.Cliente;
+import com.ProyectoTenis.demo.service.CarritoDetalleService;
+import com.ProyectoTenis.demo.service.CarritoService;
+import com.ProyectoTenis.demo.service.TenisService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.ProyectoTenis.demo.domain.Carrito;
-import com.ProyectoTenis.demo.domain.CarritoDetalle;
-import com.ProyectoTenis.demo.domain.Cliente;
-import com.ProyectoTenis.demo.service.CarritoService;
-import com.ProyectoTenis.demo.service.CarritoDetalleService;
-import com.ProyectoTenis.demo.service.OrdenService;
-import java.math.BigDecimal;
-import java.util.List;
 
 @Controller
 @RequestMapping("/carrito")
-@SessionAttributes("cliente")
 public class CarritoController {
 
     @Autowired
@@ -25,91 +25,66 @@ public class CarritoController {
     private CarritoDetalleService carritoDetalleService;
 
     @Autowired
-    private OrdenService ordenService;
+    private TenisService tenisService;
 
-    /**
-     * Muestra el carrito actual del cliente con todos los productos agregados.
-     */
-    @GetMapping
-    public String verCarrito(@SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                             Model model,
-                             RedirectAttributes ra) {
-
+    /** VER CARRITO */
+    @GetMapping("")
+    public String verCarrito(HttpSession session, Model model, RedirectAttributes ra) {
+        Cliente cliente = (Cliente) session.getAttribute("clienteLogueado");
         if (cliente == null) {
-            ra.addFlashAttribute("error", "Debe iniciar sesión para ver su carrito.");
+            ra.addFlashAttribute("error", "Debe iniciar sesión para ver el carrito.");
             return "redirect:/login";
         }
 
-        Carrito carrito = carritoService.obtenerCarritoActivo(cliente);
-        List<CarritoDetalle> detalles = carritoDetalleService.listarPorCarrito(carrito);
-        BigDecimal total = carritoService.calcularTotal(cliente);
+        Carrito carrito = carritoService.getOrCreateCarrito(cliente);
+        var detalles = carritoDetalleService.listarPorCarrito(carrito);
+
+        double total = detalles.stream()
+                .mapToDouble(d -> d.getCantidad() * d.getPrecioUnitario())
+                .sum();
 
         model.addAttribute("carrito", carrito);
         model.addAttribute("detalles", detalles);
         model.addAttribute("total", total);
 
-        return "carrito"; // plantilla carrito.html
+        return "cliente/carrito";
     }
 
-    /**
-     * Elimina un producto del carrito.
-     */
-    @GetMapping("/eliminar/{idTenis}")
-    public String eliminarDelCarrito(@PathVariable("idTenis") Long idTenis,
-                                     @SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                                     RedirectAttributes ra) {
+    /** AGREGAR PRODUCTO DESDE OTRA VISTA (OPCIONAL) */
+    @GetMapping("/agregar/{idTenis}")
+    public String agregar(@PathVariable Long idTenis,
+                          HttpSession session,
+                          RedirectAttributes redirect) {
 
+        Cliente cliente = (Cliente) session.getAttribute("clienteLogueado");
         if (cliente == null) {
-            ra.addFlashAttribute("error", "Debe iniciar sesión para modificar el carrito.");
+            redirect.addFlashAttribute("error", "Debe iniciar sesión para agregar productos al carrito.");
             return "redirect:/login";
         }
 
-        try {
-            carritoService.eliminarProducto(cliente, idTenis.intValue());
-            ra.addFlashAttribute("ok", "Producto eliminado del carrito.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        Carrito carrito = carritoService.getOrCreateCarrito(cliente);
+        carritoService.agregarProducto(carrito, idTenis);
 
+        redirect.addFlashAttribute("ok", "Producto agregado al carrito.");
         return "redirect:/carrito";
     }
 
-    /**
-     * Vacía todo el carrito del cliente.
-     */
-    @GetMapping("/vaciar")
-    public String vaciarCarrito(@SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                                RedirectAttributes ra) {
+    /** ELIMINAR UNA LÍNEA DEL CARRITO */
+    @GetMapping("/eliminar/{idDetalle}")
+    public String eliminar(@PathVariable Long idDetalle,
+                           HttpSession session,
+                           RedirectAttributes redirect) {
 
+        Cliente cliente = (Cliente) session.getAttribute("clienteLogueado");
         if (cliente == null) {
-            ra.addFlashAttribute("error", "Debe iniciar sesión para vaciar el carrito.");
+            redirect.addFlashAttribute("error", "Debe iniciar sesión.");
             return "redirect:/login";
         }
 
-        carritoService.vaciarCarrito(cliente);
-        ra.addFlashAttribute("ok", "Carrito vaciado correctamente.");
+        // Usamos el servicio que valida que el detalle pertenezca al carrito del cliente
+        carritoService.eliminarProducto(cliente, idDetalle);
+
+        redirect.addFlashAttribute("ok", "Producto eliminado del carrito.");
         return "redirect:/carrito";
-    }
-
-    /**
-     * Confirma la compra (genera una orden a partir del carrito).
-     */
-    @PostMapping("/confirmar")
-    public String confirmarCompra(@SessionAttribute(name = "cliente", required = false) Cliente cliente,
-                                  RedirectAttributes ra) {
-
-        if (cliente == null) {
-            ra.addFlashAttribute("error", "Debe iniciar sesión para confirmar la compra.");
-            return "redirect:/login";
-        }
-
-        try {
-            ordenService.crearOrden(cliente);
-            ra.addFlashAttribute("ok", "¡Compra confirmada exitosamente!");
-            return "redirect:/ordenes";
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/carrito";
-        }
     }
 }

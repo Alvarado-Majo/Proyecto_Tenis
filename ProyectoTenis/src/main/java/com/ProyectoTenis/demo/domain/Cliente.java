@@ -1,52 +1,92 @@
 package com.ProyectoTenis.demo.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.List;
 
-@Data
 @Entity
 @Table(name = "cliente")
 public class Cliente implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_cliente")
     private Long idCliente;
 
-    @NotNull
-    @Size(max = 100)
-    @Column(name = "nombre", nullable = false, length = 100)
+    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
-    @NotNull
-    @Size(max = 100)
-    @Column(name = "correo", nullable = false, unique = true, length = 100)
-    private String correo;
+    @NotBlank(message = "El correo es obligatorio")
+    @Email(message = "Debe ingresar un correo válido")
+    @Column(unique = true)
+    private String email;
 
-    @NotNull
-    @Size(max = 255)
-    @Column(name = "password", nullable = false, length = 255)
+    @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 
-    @Size(max = 20)
-    @Column(name = "telefono", length = 20)
     private String telefono;
 
-    @Size(max = 255)
-    @Column(name = "direccion", length = 255)
     private String direccion;
 
-    @OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL)
-    private Carrito carrito;
+    @NotBlank(message = "El rol es obligatorio")
+    private String rol = "CLIENTE";
 
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
-    private List<Orden> ordenes;
+    public Cliente() {
+    }
 
+    public Long getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(Long idCliente) {
+        this.idCliente = idCliente;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
 }

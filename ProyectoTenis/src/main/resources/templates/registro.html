@@ -1,72 +1,93 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de cliente</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <style>
+        .form-box {
+            max-width: 520px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .form-box h1 {
+            text-align: center;
+            color: var(--turquesa);
+            margin-bottom: 20px;
+        }
+        .form-box label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--gris);
+        }
+        .form-box input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid var(--turquesa);
+            margin-bottom: 15px;
+        }
+        .btn-enviar {
+            width: 100%;
+            background: var(--rosado);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-enviar:hover {
+            background: var(--turquesa);
+        }
+        .error-campo {
+            color: #cc0000;
+            font-size: 12px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
 
-<head th:replace="~{layout/plantilla :: header}"></head>
+<div class="contenedor">
 
-<body class="bg-light">
+    <div class="form-box">
+        <h1>Crear cuenta</h1>
 
-    <div class="container">
-        <div class="row justify-content-center" style="margin-top: 5vh; margin-bottom: 5vh;">
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-                        <h3 class="card-title text-center mb-4">
-                            <i class="fas fa-user-plus"></i> Registro de Nuevo Usuario
-                        </h3>
-                        
-                        <form th:action="@{/registro}" th:object="${usuario}" method="POST">
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="username" class="form-label">Username</label>
-                                    <input type="text" class="form-control" th:field="*{username}" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="password" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" th:field="*{password}" required>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="nombre" class="form-label">Nombre</label>
-                                    <input type="text" class="form-control" th:field="*{nombre}" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="apellidos" class="form-label">Apellidos</label>
-                                    <input type="text" class="form-control" th:field="*{apellidos}" required>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="correo" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" th:field="*{correo}" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="telefono" class="form-label">Teléfono (Opcional)</label>
-                                <input type="tel" class="form-control" th:field="*{telefono}">
-                            </div>
-                            
-                            <input type="hidden" th:field="*{activo}" th:value="true" />
-                            
-                            <hr>
-                            
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
-                                <a th:href="@{/login}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-arrow-left"></i> Cancelar
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-check"></i> Registrarse
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Formulario ligado al objeto 'cliente' -->
+        <form th:action="@{/registro}" th:object="${cliente}" method="post">
+
+            <label>Nombre completo</label>
+            <input type="text" th:field="*{nombre}">
+            <div th:errors="*{nombre}" class="error-campo"></div>
+
+            <label>Correo electrónico</label>
+            <input type="email" th:field="*{email}">
+            <div th:errors="*{email}" class="error-campo"></div>
+
+            <label>Contraseña</label>
+            <input type="password" th:field="*{password}">
+            <div th:errors="*{password}" class="error-campo"></div>
+
+            <label>Teléfono (opcional)</label>
+            <input type="text" th:field="*{telefono}">
+
+            <label>Dirección (opcional)</label>
+            <input type="text" th:field="*{direccion}">
+
+            <button type="submit" class="btn-enviar">Registrarme</button>
+        </form>
+
+        <p style="margin-top:15px; text-align:center;">
+            ¿Ya tienes cuenta?
+            <a th:href="@{/login}">Inicia sesión aquí</a>
+        </p>
     </div>
 
-    <footer th:replace="~{layout/plantilla :: footer}"></footer>
+</div>
+
 </body>
 </html>

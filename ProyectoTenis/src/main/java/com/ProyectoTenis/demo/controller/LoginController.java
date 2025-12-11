@@ -1,92 +1,57 @@
 package com.ProyectoTenis.demo.controller;
 
 import com.ProyectoTenis.demo.domain.Cliente;
-import com.ProyectoTenis.demo.domain.Administrador;
 import com.ProyectoTenis.demo.service.ClienteService;
-import com.ProyectoTenis.demo.service.AdministradorService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.support.SessionStatus;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/login")
-@SessionAttributes({"clienteSesion", "adminSesion"})
 public class LoginController {
 
-    @Autowired
-    private ClienteService clienteService;
+    private final ClienteService clienteService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
-    private AdministradorService administradorService;
+    public LoginController(ClienteService clienteService,
+                           BCryptPasswordEncoder passwordEncoder) {
+        this.clienteService = clienteService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-    /**
-     * Formulario de login
-     */
-    @GetMapping("")
-    public String loginForm(Model model) {
-        model.addAttribute("cliente", new Cliente());
-        model.addAttribute("admin", new Administrador());
+    @GetMapping("/login")
+    public String mostrarLogin(Model model,
+                               @RequestParam(value = "nuevo", required = false) String nuevo) {
+        if (nuevo != null) {
+            model.addAttribute("ok", "Tu cuenta se creó correctamente. Ahora inicia sesión.");
+        }
         return "login";
     }
 
-    /**
-     * Login de cliente
-     */
-    @PostMapping("/cliente")
-    public String loginCliente(
-            @ModelAttribute Cliente cliente,
-            Model model
-    ) {
+    @PostMapping("/login")
+    public String procesarLogin(@RequestParam String email,
+                                @RequestParam String password,
+                                HttpSession session,
+                                RedirectAttributes ra) {
 
-        boolean valido = clienteService.validarLogin(cliente.getCorreo(), cliente.getPassword());
+        Cliente cliente = clienteService.buscarPorEmail(email);
 
-        if (!valido) {
-            model.addAttribute("errorCliente", "Correo o contraseña incorrectos.");
-            return "login";
+        if (cliente == null || !passwordEncoder.matches(password, cliente.getPassword())) {
+            ra.addFlashAttribute("error", "Correo o contraseña incorrectos.");
+            return "redirect:/login";
         }
 
-        Cliente clienteBD = clienteService.buscarPorCorreo(cliente.getCorreo()).get();
-
-        // Guardar en sesión
-        model.addAttribute("clienteSesion", clienteBD);
-
+        session.setAttribute("clienteLogueado", cliente);
+        ra.addFlashAttribute("ok", "Bienvenido, " + cliente.getNombre() + "!");
         return "redirect:/";
     }
 
-    /**
-     * Login de administrador
-     */
-    @PostMapping("/admin")
-    public String loginAdmin(
-            @ModelAttribute Administrador admin,
-            Model model
-    ) {
-
-        boolean valido = administradorService.validarLogin(admin.getUsuario(), admin.getPassword());
-
-        if (!valido) {
-            model.addAttribute("errorAdmin", "Usuario o contraseña incorrectos.");
-            return "login";
-        }
-
-        Administrador adminBD = administradorService.buscarPorUsuario(admin.getUsuario());
-        model.addAttribute("adminSesion", adminBD);
-
-
-        return "redirect:/admin";
-    }
-
-    /**
-     * Logout general
-     */
-    @GetMapping("/logout")
-    public String logout(SessionStatus status, HttpSession session) {
-        status.setComplete();
+    @GetMapping("/logout-cliente")
+    public String logout(HttpSession session, RedirectAttributes ra) {
         session.invalidate();
-        return "redirect:/login";
+        ra.addFlashAttribute("ok", "Has cerrado sesión correctamente.");
+        return "redirect:/";
     }
 }

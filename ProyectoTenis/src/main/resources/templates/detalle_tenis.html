@@ -2,52 +2,62 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Detalles del Producto</title>
+    <title th:text="${tenis.nombre}">Detalle del producto</title>
+
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
-
 <body>
 
-<!-- NAVBAR -->
-<div th:replace="general/fragmentos :: navbar"></div>
+<div class="contenedor">
 
-<div class="contenedor-detalle">
+    <a th:href="@{/}" style="text-decoration:none; color:var(--turquesa); font-weight:bold;">
+        ← Volver al catálogo
+    </a>
 
-    <div class="detalle-card" th:if="${tenis != null}">
-        
-        <img th:src="@{${tenis.imagen}}" class="detalle-img">
+    <h1 class="titulo" th:text="${tenis.nombre}"></h1>
 
-        <div class="detalle-info">
-            <h2 th:text="${tenis.nombre}"></h2>
+    <div class="producto-detalle" style="display:flex; gap:30px; margin-top:20px;">
 
-            <p class="precio-detalle">
-                ₡ <span th:text="${tenis.precio}"></span>
-            </p>
+        <!-- IMAGEN -->
+        <div style="flex:1;">
+            <img th:src="${tenis.imagen}" alt="Imagen" style="width:100%; border-radius:10px;">
+        </div>
+
+        <!-- INFO -->
+        <div style="flex:1;">
 
             <p><strong>Marca:</strong> <span th:text="${tenis.marca}"></span></p>
 
-            <p><strong>Categoría:</strong> 
-                <span th:text="${tenis.categoria.nombre}"></span>
+            <p><strong>Categoría:</strong> <span th:text="${tenis.categoria.nombre}"></span></p>
+
+            <p><strong>Talla:</strong> <span th:text="${tenis.talla}"></span></p>
+
+            <p style="font-size:22px; font-weight:bold; color:var(--rosado);">
+                ₡ <span th:text="${tenis.precio}"></span>
             </p>
 
-            <form th:action="@{'/agregar-carrito/' + ${tenis.idTenis}}" method="post">
+            <p th:text="${tenis.descripcion}"></p>
+
+            <p th:if="${tenis.stock > 0}">
+                Stock disponible: <strong th:text="${tenis.stock}"></strong>
+            </p>
+
+            <p th:if="${tenis.stock <= 0}" class="sin-stock">Sin stock disponible</p>
+
+            <!-- BOTÓN AGREGAR -->
+            <form th:action="@{/agregar-carrito/{id}(id=${tenis.idTenis})}" method="post"
+                  th:if="${tenis.stock > 0}">
                 <label>Cantidad:</label>
-                <input type="number" name="cantidad" value="1" min="1" class="input-cantidad">
-
-                <button type="submit" class="btn-agregar">
-                    Agregar al carrito 🛒
-                </button>
+                <input type="number" name="cantidad" value="1" min="1"
+                       style="padding:5px; width:60px; margin-bottom:10px; border-radius:6px;">
+                <br>
+                <button type="submit" class="btn-comprar">Agregar al carrito</button>
             </form>
-
-            <a href="/" class="btn-volver">Volver al catálogo</a>
         </div>
 
     </div>
 
 </div>
-
-<!-- FOOTER -->
-<div th:replace="general/fragmentos :: footer"></div>
 
 </body>
 </html>

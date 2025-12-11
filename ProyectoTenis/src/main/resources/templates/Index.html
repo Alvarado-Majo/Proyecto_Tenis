@@ -1,60 +1,92 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
-    <title>Tenis Shop</title>
+    <title>Tienda de tenis</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
-
 <body>
 
-<!-- ✨ Navbar -->
-<div th:replace="general/fragmentos :: navbar"></div>
+<!-- 🔹 HEADER SIMPLE (sin lógica de sesión por ahora) -->
+<header style="width:90%; margin:auto; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
+    <div style="font-weight:bold; color:var(--turquesa); font-size:20px;">
+        Tienda de Tenis
+    </div>
+    <nav style="display:flex; gap:15px;">
+        <a th:href="@{/}" style="text-decoration:none; color:var(--gris);">Inicio</a>
+        <a th:href="@{/carrito}" style="text-decoration:none; color:var(--gris);">Ver carrito</a>
+        <a th:href="@{/login}" style="text-decoration:none; color:var(--rosado); font-weight:bold;">
+            Iniciar sesión
+        </a>
+        <a th:href="@{/registro}" style="text-decoration:none; color:var(--turquesa); font-weight:bold;">
+            Registrarse
+        </a>
+    </nav>
+</header>
 
 <div class="contenedor">
 
     <h1 class="titulo">Catálogo de Tenis</h1>
 
-    <!-- 🔍 FILTROS -->
+    <!-- Mensajes -->
+    <div th:if="${ok}" class="alert alert-ok" th:text="${ok}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- FILTROS -->
     <div class="filtros">
-        <form method="get" action="/" style="display:inline;">
-        
+        <form th:action="@{/}" method="get">
+            <input type="text" name="buscar" th:value="${buscar}" placeholder="Buscar por nombre...">
+            
             <select name="categoria">
                 <option value="">Todas las categorías</option>
-                <option th:each="cat : ${categorias}"
-                        th:value="${cat.idCategoria}"
-                        th:text="${cat.nombre}"
-                        th:selected="${idCategoria == cat.idCategoria}">
+                <option th:each="c : ${categorias}"
+                        th:value="${c.idCategoria}"
+                        th:selected="${idCategoria != null and idCategoria == c.idCategoria}"
+                        th:text="${c.nombre}">
                 </option>
             </select>
-
-            <input type="text" name="buscar" placeholder="Buscar..."
-                   th:value="${buscar}" />
 
             <button type="submit">Filtrar</button>
         </form>
     </div>
 
-    <!-- 🛒 CATALOGO -->
+    <!-- CATÁLOGO -->
     <div class="catalogo">
-        <div class="card" th:each="tenis : ${tenisList}">
-        
-            <img th:src="@{${tenis.imagen}}" alt="Imagen del tenis">
 
-            <h3 th:text="${tenis.nombre}"></h3>
+        <!-- Si no hay tenis -->
+        <p th:if="${#lists.isEmpty(tenisList)}">No hay productos disponibles.</p>
 
-            <p>₡ <span th:text="${tenis.precio}"></span></p>
+        <!-- Lista de tenis -->
+        <div class="card" th:each="t : ${tenisList}">
+            
+            <a th:href="@{/detalle/{id}(id=${t.idTenis})}">
+                <img th:src="${t.imagen}" alt="Imagen del tenis">
+            </a>
 
-            <a th:href="@{'/detalle/' + ${tenis.idTenis}}"
-               class="btn-comprar">Ver Detalles</a>
+            <h3 th:text="${t.nombre}"></h3>
+
+            <p><strong>₡</strong> <span th:text="${t.precio}"></span></p>
+
+            <p th:text="'Marca: ' + ${t.marca}"></p>
+
+            <p th:if="${t.stock > 0}">
+                Stock disponible: <span th:text="${t.stock}"></span>
+            </p>
+
+            <p th:if="${t.stock <= 0}" class="sin-stock">Sin stock</p>
+
+            <!-- BOTÓN COMPRAR -->
+            <form th:action="@{/agregar-carrito/{id}(id=${t.idTenis})}" method="post"
+                  th:if="${t.stock > 0}">
+                <input type="hidden" name="cantidad" value="1">
+                <button type="submit" class="btn-comprar">Agregar al carrito</button>
+            </form>
+
         </div>
+
     </div>
 
 </div>
-
-<!-- ✨ Footer -->
-<div th:replace="general/fragmentos :: footer"></div>
 
 </body>
 </html>

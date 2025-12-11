@@ -1,16 +1,18 @@
 package com.ProyectoTenis.demo.controller;
 
 import com.ProyectoTenis.demo.domain.Categoria;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ProyectoTenis.demo.domain.Cliente;
 import com.ProyectoTenis.demo.domain.Tenis;
 import com.ProyectoTenis.demo.service.CarritoService;
 import com.ProyectoTenis.demo.service.CategoriaService;
 import com.ProyectoTenis.demo.service.TenisService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +29,7 @@ public class IndexController {
     @Autowired
     private CarritoService carritoService;
 
+    /** CATÁLOGO PRINCIPAL */
     @GetMapping
     public String mostrarCatalogo(
             @RequestParam(value = "categoria", required = false) Integer idCategoria,
@@ -37,7 +40,7 @@ public class IndexController {
 
         // FILTRO POR CATEGORIA
         if (idCategoria != null) {
-            Optional<Categoria> categoriaOpt = categoriaService.buscarPorId(idCategoria.longValue()); // CORRECCIÓN
+            Optional<Categoria> categoriaOpt = categoriaService.buscarPorId(idCategoria.longValue());
 
             if (categoriaOpt.isPresent()) {
                 tenisList = tenisService.listarPorCategoria(categoriaOpt.get());
@@ -62,13 +65,16 @@ public class IndexController {
         return "index";
     }
 
+    /** DETALLE DE PRODUCTO */
     @GetMapping("/detalle/{id}")
-    public String mostrarDetalleProducto(@PathVariable("id") Long idTenis, Model model) {
+    public String mostrarDetalleProducto(@PathVariable("id") Long idTenis,
+                                         Model model,
+                                         RedirectAttributes ra) {
 
         Optional<Tenis> tenisOpt = tenisService.buscarPorId(idTenis);
 
         if (tenisOpt.isEmpty()) {
-            model.addAttribute("error", "El producto no existe o fue eliminado.");
+            ra.addFlashAttribute("error", "El producto no existe o fue eliminado.");
             return "redirect:/";
         }
 
@@ -76,26 +82,33 @@ public class IndexController {
         return "detalle_tenis";
     }
 
+    /** AGREGAR AL CARRITO DESDE EL CATÁLOGO O DETALLE */
     @PostMapping("/agregar-carrito/{id}")
     public String agregarAlCarrito(
-            @PathVariable("id") Long idTenis, // CAMBIADO A LONG
+            @PathVariable("id") Long idTenis,
             @RequestParam(defaultValue = "1") int cantidad,
-            @SessionAttribute(name = "cliente", required = false) Cliente cliente,
+            HttpSession session,
             RedirectAttributes ra) {
 
+        Cliente cliente = (Cliente) session.getAttribute("clienteLogueado");
         if (cliente == null) {
             ra.addFlashAttribute("error", "Debe iniciar sesión para agregar productos al carrito.");
             return "redirect:/login";
         }
 
         try {
-            carritoService.agregarProducto(cliente, idTenis.intValue(), cantidad); // SE MANTIENE INT PARA EL SERVICIO
+            var carrito = carritoService.getOrCreateCarrito(cliente);
+
+            // Agregamos el producto 'cantidad' veces
+            for (int i = 0; i < cantidad; i++) {
+                carritoService.agregarProducto(carrito, idTenis);
+            }
+
             ra.addFlashAttribute("ok", "Producto agregado al carrito.");
         } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
+            ra.addFlashAttribute("error", "Error al agregar al carrito: " + e.getMessage());
         }
 
         return "redirect:/";
     }
 }
-

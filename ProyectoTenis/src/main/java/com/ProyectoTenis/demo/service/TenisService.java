@@ -3,79 +3,52 @@ package com.ProyectoTenis.demo.service;
 import com.ProyectoTenis.demo.domain.Categoria;
 import com.ProyectoTenis.demo.domain.Tenis;
 import com.ProyectoTenis.demo.repository.TenisRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TenisService {
 
-    @Autowired
-    private TenisRepository tenisRepository;
+    private final TenisRepository tenisRepository;
 
-    /** LISTAR TODOS */
+    public TenisService(TenisRepository tenisRepository) {
+        this.tenisRepository = tenisRepository;
+    }
+
+    // LISTAR TODOS (catálogo, admin)
     public List<Tenis> listarTenis() {
         return tenisRepository.findAll();
     }
 
-    /** BUSCAR POR ID */
-    public Optional<Tenis> buscarPorId(Long idTenis) {
-        return tenisRepository.findById(idTenis);
-    }
-
-    /** GUARDAR (crear o actualizar) */
+    // GUARDAR (crear / editar)
     public Tenis guardar(Tenis tenis) {
-
-        // Validaciones
-        if (tenis.getNombre() == null || tenis.getNombre().isBlank()) {
-            throw new IllegalArgumentException("El nombre del producto es obligatorio.");
-        }
-
-        // *** AQUÍ ESTABA EL ERROR ***
-        if (tenis.getPrecio() == null || tenis.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("El precio debe ser positivo.");
-        }
-
-        if (tenis.getCategoria() == null || tenis.getCategoria().getIdCategoria() == null) {
-            throw new IllegalArgumentException("Debe seleccionar una categoría válida.");
-        }
-
         return tenisRepository.save(tenis);
     }
 
-    /** ELIMINAR */
-    public void eliminar(Long idTenis) {
-        if (!tenisRepository.existsById(idTenis)) {
-            throw new IllegalArgumentException("El producto no existe.");
-        }
-        tenisRepository.deleteById(idTenis);
+    // BUSCAR POR ID (devuelve Optional para usar en controladores)
+    public Optional<Tenis> buscarPorId(Long id) {
+        return tenisRepository.findById(id);
     }
 
-    /** BUSCAR POR NOMBRE EXACTO */
-    public Tenis buscarPorNombre(String nombre) {
-        return tenisRepository.findByNombre(nombre);
+    // ELIMINAR
+    public void eliminar(Long id) {
+        tenisRepository.deleteById(id);
     }
 
-    /** BUSCAR POR NOMBRE SIMILAR */
+    // LISTAR POR CATEGORÍA (por id)
+    public List<Tenis> listarPorCategoria(Long idCategoria) {
+        return tenisRepository.findByCategoriaIdCategoria(idCategoria);
+    }
+
+    // LISTAR POR CATEGORÍA (por entidad)
+    public List<Tenis> listarPorCategoria(Categoria categoria) {
+        return tenisRepository.findByCategoria(categoria);
+    }
+
+    // BÚSQUEDA POR NOMBRE (catálogo)
     public List<Tenis> buscarPorNombreSimilar(String nombre) {
         return tenisRepository.findByNombreContaining(nombre);
-    }
-
-    /** BUSCAR POR MARCA */
-    public List<Tenis> buscarPorMarca(String marca) {
-        return tenisRepository.findByMarcaContaining(marca);
-    }
-
-    /** LISTAR POR CATEGORÍA */
-    public List<Tenis> listarPorCategoria(Categoria categoria) {
-
-        if (categoria == null || categoria.getIdCategoria() == null) {
-            throw new IllegalArgumentException("La categoría no es válida.");
-        }
-
-        return tenisRepository.findByCategoria_IdCategoria(categoria.getIdCategoria());
     }
 }
