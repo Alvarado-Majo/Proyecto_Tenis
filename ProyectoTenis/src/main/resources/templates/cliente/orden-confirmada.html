@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Orden confirmada</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <style>
+        .factura-box {
+            max-width: 800px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .factura-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .factura-header h1 {
+            margin: 0;
+            color: var(--turquesa);
+        }
+        .factura-datos p {
+            margin: 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #f3f3f3;
+        }
+        .total-linea {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--rosado);
+        }
+        .btn-volver {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: var(--turquesa);
+            color: #fff;
+            text-decoration: none;
+        }
+        .btn-volver:hover {
+            background: #0ba4a4;
+        }
+    </style>
+</head>
+<body>
+
+<header style="width:90%; margin:auto; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
+    <div style="font-weight:bold; color:var(--turquesa); font-size:20px;">
+        Tienda de Tenis
+    </div>
+    <nav style="display:flex; gap:15px;">
+        <a th:href="@{/}" style="text-decoration:none; color:var(--gris);">Inicio</a>
+        <a th:href="@{/carrito}" style="text-decoration:none; color:var(--gris);">Ver carrito</a>
+    </nav>
+</header>
+
+<div class="factura-box">
+
+    <div class="factura-header">
+        <h1>Orden confirmada</h1>
+        <div>
+            <p><strong>Número de orden:</strong>
+                <span th:text="${orden.idOrden}">1</span>
+            </p>
+            <p><strong>Fecha:</strong>
+                <span th:text="${#temporals.format(orden.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2025</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="factura-datos">
+        <p><strong>Cliente:</strong>
+            <span th:text="${orden.cliente.nombre}">Nombre cliente</span>
+        </p>
+        <p th:if="${orden.direccionEnvio != null}">
+            <strong>Dirección de envío:</strong>
+            <span th:text="${orden.direccionEnvio}">Dirección</span>
+        </p>
+        <p><strong>Estado:</strong>
+            <span th:text="${orden.estado}">PAGADA</span>
+        </p>
+    </div>
+
+    <h3>Detalle de la compra</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Marca</th>
+            <th>Talla</th>
+            <th>Precio unitario</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="d : ${detalles}">
+            <td th:text="${d.tenis.nombre}">Nombre tenis</td>
+            <td th:text="${d.tenis.marca}">Marca</td>
+            <td th:text="${d.tenis.talla}">Talla</td>
+            <td th:text="${d.precioUnitario}">0.0</td>
+            <td th:text="${d.cantidad}">1</td>
+            <td th:text="${d.subtotal}">0.0</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="total-linea">
+        Total pagado: ₡ <span th:text="${orden.total}">0.0</span>
+    </p>
+
+    <a th:href="@{/}" class="btn-volver">Volver al catálogo</a>
+</div>
+
+</body>
+</html>

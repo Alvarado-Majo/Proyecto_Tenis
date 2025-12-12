@@ -29,14 +29,11 @@ public class Tenis implements Serializable {
     @Column(length = 1000)
     private String descripcion;
 
-    // Nombre de archivo o URL de la imagen
     private String imagen;
 
-    @NotNull(message = "El stock es obligatorio")
     @Positive(message = "El stock debe ser mayor a 0")
     private Integer stock;
 
-    @NotBlank(message = "La talla es obligatoria")
     private String talla;
 
     @ManyToOne
@@ -119,4 +116,3 @@ public class Tenis implements Serializable {
         this.categoria = categoria;
     }
 }
-

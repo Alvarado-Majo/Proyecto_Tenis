@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de tenis</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn-nuevo {
+            display: inline-block;
+            margin-bottom: 15px;
+            background: var(--turquesa);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+        .btn-nuevo:hover {
+            background: var(--rosado);
+        }
+        .btn-editar {
+            background: var(--turquesa);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .btn-editar:hover {
+            background: var(--rosado);
+        }
+        .btn-eliminar {
+            background: #ff4d4d;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .btn-eliminar:hover {
+            background: #cc0000;
+        }
+        .alert {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+        .alert-ok {
+            background: #d4edda;
+            color: #155724;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+<header style="width:90%; margin:auto; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
+    <div style="font-weight:bold; color:var(--turquesa); font-size:20px;">
+        Panel administrador - Tenis
+    </div>
+    <nav style="display:flex; gap:15px;">
+        <a th:href="@{/}" style="text-decoration:none; color:var(--gris);">Ver tienda</a>
+        <a th:href="@{/admin/logout}" style="text-decoration:none; color:var(--rosado); font-weight:bold;">
+            Cerrar sesión admin
+        </a>
+    </nav>
+</header>
+
+<div class="contenedor">
+
+    <h1 class="titulo">Gestión de tenis</h1>
+
+    <!-- Mensajes -->
+    <div th:if="${ok}" class="alert alert-ok" th:text="${ok}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <a th:href="@{/admin/tenis/nuevo}" class="btn-nuevo">+ Nuevo tenis</a>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Talla</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="t : ${tenisList}">
+            <td th:text="${t.idTenis}">1</td>
+            <td>
+                <img th:src="${t.imagen}" alt="Img" style="width:60px; border-radius:8px;">
+            </td>
+            <td th:text="${t.nombre}">Nombre</td>
+            <td th:text="${t.marca}">Marca</td>
+            <td th:text="${t.precio}">0.0</td>
+            <td th:text="${t.stock}">0</td>
+            <td th:text="${t.talla}">Talla</td>
+            <td th:text="${t.categoria != null ? t.categoria.nombre : 'Sin categoría'}">Cat</td>
+            <td>
+                <a th:href="@{/admin/tenis/editar/{id}(id=${t.idTenis})}" class="btn-editar">
+                    Editar
+                </a>
+                <a th:href="@{/admin/tenis/eliminar/{id}(id=${t.idTenis})}"
+                   class="btn-eliminar"
+                   onclick="return confirm('¿Seguro que desea eliminar este tenis?');">
+                    Eliminar
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

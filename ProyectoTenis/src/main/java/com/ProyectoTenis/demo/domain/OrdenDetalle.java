@@ -11,7 +11,7 @@ public class OrdenDetalle implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_detalle")  // 👈 coincide con la BD
+    @Column(name = "id_detalle")  
     private Long idOrdenDetalle;
 
     @ManyToOne
@@ -28,7 +28,7 @@ public class OrdenDetalle implements Serializable {
 
     @NotNull(message = "El precio unitario es obligatorio")
     @Positive(message = "El precio unitario debe ser mayor a 0")
-    @Column(name = "precio_unit")   // 👈 igual que en la tabla
+    @Column(name = "precio_unit")   
     private Double precioUnitario;
 
     @NotNull(message = "El subtotal es obligatorio")

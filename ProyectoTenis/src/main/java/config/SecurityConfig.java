@@ -15,10 +15,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()   // por ahora todo abierto
+                .anyRequest().permitAll()   
             )
             .logout(logout -> logout.permitAll())
-            .formLogin(login -> login.disable()); // desactiva login default de Spring
+            .formLogin(login -> login.disable()); 
 
         return http.build();
     }

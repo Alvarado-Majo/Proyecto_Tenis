@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Iniciar Sesión</title>
+    <title>Login Administrador</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <style>
         .form-box {
@@ -15,7 +15,7 @@
         }
         h1 {
             text-align: center;
-            color: var(--turquesa);
+            color: var(--rosado);
             margin-bottom: 20px;
         }
         label {
@@ -32,7 +32,7 @@
         }
         .btn-enviar {
             width: 100%;
-            background: var(--rosado);
+            background: var(--turquesa);
             border: none;
             padding: 12px;
             color: white;
@@ -41,7 +41,7 @@
             cursor: pointer;
         }
         .btn-enviar:hover {
-            background: var(--turquesa);
+            background: var(--rosado);
         }
         .alert-ok {
             background: #d4f7df;
@@ -56,18 +56,20 @@
             margin-bottom: 15px;
         }
 
-        .admin-box {
+        .switch-login {
             margin-top: 20px;
             text-align: center;
             padding-top: 10px;
             border-top: 1px solid #ddd;
         }
-        .admin-box a {
+
+        .switch-login a {
             color: var(--turquesa);
-            font-weight: 600;
             text-decoration: none;
+            font-weight: 600;
         }
-        .admin-box a:hover {
+
+        .switch-login a:hover {
             color: var(--rosado);
         }
     </style>
@@ -76,18 +78,15 @@
 
 <div class="form-box">
 
-    <h1>Iniciar Sesión</h1>
+    <h1>Administrador</h1>
 
-    <!-- Mensaje de éxito -->
+    <!-- mensajes -->
     <div th:if="${ok}" class="alert-ok" th:text="${ok}"></div>
-
-    <!-- Mensaje de error -->
     <div th:if="${error}" class="alert-error" th:text="${error}"></div>
 
-    <!-- Login CLIENTES -->
-    <form th:action="@{/login}" method="post">
+    <form th:action="@{/admin/login}" method="post">
 
-        <label for="email">Correo electrónico</label>
+        <label for="email">Correo del administrador</label>
         <input type="email" id="email" name="email" required>
 
         <label for="password">Contraseña</label>
@@ -96,15 +95,9 @@
         <button type="submit" class="btn-enviar">Entrar</button>
     </form>
 
-    <p style="margin-top:15px; text-align:center;">
-        ¿No tienes cuenta?
-        <a th:href="@{/registro}">Regístrate aquí</a>
-    </p>
-
-    <!-- 🔹 SECCIÓN PARA ADMINISTRADORES -->
-    <div class="admin-box">
-        <p>¿Eres administrador?</p>
-        <a th:href="@{/admin/login}">Iniciar sesión como administrador</a>
+    <div class="switch-login">
+        <p>¿Eres cliente?</p>
+        <a th:href="@{/login}">Iniciar sesión como cliente</a>
     </div>
 
 </div>

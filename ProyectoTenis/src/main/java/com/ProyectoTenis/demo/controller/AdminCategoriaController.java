@@ -18,9 +18,6 @@ public class AdminCategoriaController {
     @Autowired
     private CategoriaService categoriaService;
 
-    /* ============================
-       LISTAR
-       ============================ */
     @GetMapping
     public String listarCategorias(
             @SessionAttribute(name = "admin", required = false) Object admin,
@@ -37,9 +34,6 @@ public class AdminCategoriaController {
         return "admin/categorias_list";
     }
 
-    /* ============================
-       NUEVA
-       ============================ */
     @GetMapping("/nueva")
     public String nuevaCategoria(
             @SessionAttribute(name = "admin", required = false) Object admin,
@@ -55,9 +49,6 @@ public class AdminCategoriaController {
         return "admin/categorias_form";
     }
 
-    /* ============================
-       GUARDAR (crear o editar)
-       ============================ */
     @PostMapping("/guardar")
     public String guardarCategoria(
             @SessionAttribute(name = "admin", required = false) Object admin,
@@ -87,9 +78,6 @@ public class AdminCategoriaController {
         return "redirect:/admin/categorias";
     }
 
-    /* ============================
-       EDITAR
-       ============================ */
     @GetMapping("/editar/{id}")
     public String editarCategoria(
             @PathVariable("id") Long idCategoria,
@@ -113,9 +101,6 @@ public class AdminCategoriaController {
         return "admin/categorias_form";
     }
 
-    /* ============================
-       ELIMINAR
-       ============================ */
     @GetMapping("/eliminar/{id}")
     public String eliminarCategoria(
             @PathVariable("id") Long idCategoria,

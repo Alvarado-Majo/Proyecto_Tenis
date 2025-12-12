@@ -17,37 +17,52 @@ public class TenisService {
         this.tenisRepository = tenisRepository;
     }
 
-    // LISTAR TODOS (catálogo, admin)
+    /* ======================= LISTAR ======================= */
+
+    
     public List<Tenis> listarTenis() {
         return tenisRepository.findAll();
     }
 
-    // GUARDAR (crear / editar)
+    public List<Tenis> listarTodos() {
+        return tenisRepository.findAll();
+    }
+
+    /* ======================= GUARDAR ======================= */
+
     public Tenis guardar(Tenis tenis) {
         return tenisRepository.save(tenis);
     }
 
-    // BUSCAR POR ID (devuelve Optional para usar en controladores)
+    /* ======================= BUSCAR ======================= */
+
     public Optional<Tenis> buscarPorId(Long id) {
         return tenisRepository.findById(id);
     }
 
-    // ELIMINAR
+    /* ======================= ELIMINAR ======================= */
+
     public void eliminar(Long id) {
         tenisRepository.deleteById(id);
     }
 
-    // LISTAR POR CATEGORÍA (por id)
+    public void eliminarPorId(Long id) {
+        tenisRepository.deleteById(id);
+    }
+
+    /* ======================= FILTROS / BÚSQUEDAS ======================= */
+
+    // Listar por categoría (id)
     public List<Tenis> listarPorCategoria(Long idCategoria) {
         return tenisRepository.findByCategoriaIdCategoria(idCategoria);
     }
 
-    // LISTAR POR CATEGORÍA (por entidad)
+    // Listar por categoría (entidad)
     public List<Tenis> listarPorCategoria(Categoria categoria) {
         return tenisRepository.findByCategoria(categoria);
     }
 
-    // BÚSQUEDA POR NOMBRE (catálogo)
+    // Búsqueda por nombre (para el catálogo)
     public List<Tenis> buscarPorNombreSimilar(String nombre) {
         return tenisRepository.findByNombreContaining(nombre);
     }

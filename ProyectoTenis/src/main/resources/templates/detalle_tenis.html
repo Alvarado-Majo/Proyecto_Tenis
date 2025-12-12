@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${tenis.nombre}">Detalle tenis</title>
+    <title th:text="${tenis.nombre}">Mas info</title>
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
     <style>
         .detalle-tenis {
@@ -14,7 +14,6 @@
         .detalle-imagen img {
             max-width: 320px;
             border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,.15);
         }
         .detalle-info p {
             margin: 8px 0;
@@ -23,78 +22,25 @@
         .precio {
             font-size: 22px;
             font-weight: bold;
-            color: var(--rosado);
         }
         .btn-volver {
             display: inline-block;
             margin-top: 15px;
             padding: 8px 16px;
-            background: var(--gris);
-            color: #fff;
-            border-radius: 8px;
             text-decoration: none;
-        }
-        .btn-volver:hover {
-            background: #555;
-        }
-        .btn-comprar {
-            margin-top: 10px;
+            border-radius: 8px;
         }
         .sin-stock {
             color: #cc0000;
             font-weight: bold;
         }
-        .form-cantidad {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .form-cantidad input[type="number"] {
-            width: 80px;
-            padding: 5px;
-            border-radius: 6px;
-            border: 2px solid var(--turquesa);
-        }
     </style>
 </head>
 <body>
 
-<!-- HEADER igual al de index -->
-<header style="width:90%; margin:auto; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
-    <div style="font-weight:bold; color:var(--turquesa); font-size:20px;">
-        Tienda de Tenis
-    </div>
-    <nav style="display:flex; gap:15px;">
-        <a th:href="@{/}" style="text-decoration:none; color:var(--gris);">Inicio</a>
-        <a th:href="@{/carrito}" style="text-decoration:none; color:var(--gris);">Ver carrito</a>
-
-        <!-- NO hay cliente en sesión -->
-        <span th:if="${#httpSession.getAttribute('clienteLogueado') == null}">
-            <a th:href="@{/login}" style="text-decoration:none; color:var(--rosado); font-weight:bold;">
-                Iniciar sesión
-            </a>
-            <a th:href="@{/registro}" style="text-decoration:none; color:var(--turquesa); font-weight:bold;">
-                Registrarse
-            </a>
-        </span>
-
-        <!-- SÍ hay cliente en sesión -->
-        <span th:if="${#httpSession.getAttribute('clienteLogueado') != null}">
-            <span style="color:var(--gris);">
-                Hola,
-                <span th:text="${#httpSession.getAttribute('clienteLogueado').nombre}">Cliente</span>
-            </span>
-            <a th:href="@{/logout-cliente}" style="text-decoration:none; color:var(--rosado); font-weight:bold;">
-                Cerrar sesión
-            </a>
-        </span>
-    </nav>
-</header>
-
 <div class="contenedor">
 
-    <h1 class="titulo">Detalle del tenis</h1>
+    <h1 class="titulo">Detalle de la tenis</h1>
 
     <div class="detalle-tenis">
 
@@ -124,28 +70,27 @@
                 <span th:text="${tenis.descripcion}">Descripción del producto</span>
             </p>
 
-            <p th:if="${tenis.stock > 0}">
-                <strong>Stock disponible:</strong>
-                <span th:text="${tenis.stock}">0</span> pares
+            <!-- STOCK (simple) -->
+            <p th:if="${tenis.stock != null}">
+                <strong>Stock:</strong>
+                <span th:text="${tenis.stock}">0</span>
             </p>
 
-            <p th:if="${tenis.stock <= 0}" class="sin-stock">
-                Sin stock actualmente
-            </p>
-
-            <!-- FORMULARIO PARA AGREGAR AL CARRITO -->
-            <form th:if="${tenis.stock > 0}"
+            <!-- FORM AGREGAR AL CARRITO (solo si hay stock y > 0) -->
+            <form th:if="${tenis.stock != null and tenis.stock > 0}"
                   th:action="@{/agregar-carrito/{id}(id=${tenis.idTenis})}"
-                  method="post"
-                  class="form-cantidad">
+                  method="post">
 
                 <label for="cantidad"><strong>Cantidad:</strong></label>
                 <input type="number" id="cantidad" name="cantidad" min="1" value="1">
 
-                <button type="submit" class="btn-comprar">
-                    Agregar al carrito
-                </button>
+                <button type="submit">Agregar al carrito</button>
             </form>
+
+            <!-- Mensaje si no hay stock -->
+            <p th:if="${tenis.stock == null or tenis.stock <= 0}" class="sin-stock">
+                Sin stock actualmente
+            </p>
 
             <a th:href="@{/}" class="btn-volver">Volver al catálogo</a>
         </div>

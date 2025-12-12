@@ -21,10 +21,6 @@ public class CategoriaService {
         this.categoriaRepository = categoriaRepository;
     }
 
-    /* ===========================
-       Consultas / Listados
-       =========================== */
-
     public List<Categoria> listarCategorias() {
         return categoriaRepository.findAll();
     }
@@ -45,9 +41,6 @@ public class CategoriaService {
         return buscarPorNombre(nombre).isPresent();
     }
 
-    /* ===========================
-       Crear / Actualizar
-       =========================== */
 
     public Categoria crear(String nombre) {
         validarNombreObligatorio(nombre);
@@ -70,7 +63,7 @@ public class CategoriaService {
         Categoria existente = categoriaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada."));
 
-        // Validar nombre duplicado si cambió
+   
         if (!existente.getNombre().equalsIgnoreCase(normalizado)
                 && existeNombre(normalizado)) {
             throw new IllegalArgumentException("Ya existe una categoría con ese nombre.");
@@ -80,9 +73,6 @@ public class CategoriaService {
         return categoriaRepository.save(existente);
     }
 
-    /* ===========================
-       Eliminar
-       =========================== */
 
     public void eliminar(Long id) {
         Categoria categoria = categoriaRepository.findById(id)
@@ -96,10 +86,6 @@ public class CategoriaService {
             );
         }
     }
-
-    /* ===========================
-       Helpers
-       =========================== */
 
     private void validarNombreObligatorio(String nombre) {
         if (nombre == null || nombre.isBlank()) {

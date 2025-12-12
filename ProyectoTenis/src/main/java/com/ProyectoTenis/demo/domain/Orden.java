@@ -22,7 +22,6 @@ public class Orden implements Serializable {
     @NotNull(message = "La orden debe pertenecer a un cliente")
     private Cliente cliente;
 
-    // 👇 Esta columna corresponde a "fecha" de la BD
     @Column(name = "fecha")
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 

@@ -31,8 +31,7 @@ public class CarritoDetalle implements Serializable {
     @Column(name = "precio_unit")
     private Double precioUnitario;
 
-    @NotNull(message = "El subtotal es obligatorio")
-    @Positive(message = "El subtotal debe ser mayor a 0")
+    @Column(name = "subtotal")
     private Double subtotal;
 
     public CarritoDetalle() {
@@ -88,9 +87,6 @@ public class CarritoDetalle implements Serializable {
         this.subtotal = subtotal;
     }
 
-    /**
-     * Recalcula el subtotal siempre que cantidad y precio estén definidos.
-     */
     private void recalcularSubtotal() {
         if (this.cantidad != null && this.precioUnitario != null) {
             this.subtotal = this.cantidad * this.precioUnitario;

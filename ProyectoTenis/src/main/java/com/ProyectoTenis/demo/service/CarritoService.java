@@ -28,63 +28,84 @@ public class CarritoService {
         this.tenisRepository = tenisRepository;
     }
 
-    /**
-     * Obtiene el carrito ABIERTO del cliente o lo crea si no existe.
-     */
     @Transactional
     public Carrito getOrCreateCarrito(Cliente cliente) {
+        if (cliente == null || cliente.getIdCliente() == null) {
+            throw new IllegalArgumentException("El cliente no es válido.");
+        }
+
         Carrito carrito = carritoRepository.findByClienteAndEstado(cliente, "ABIERTO");
         if (carrito == null) {
             carrito = new Carrito();
             carrito.setCliente(cliente);
             carrito.setEstado("ABIERTO");
-            // fechaCreacion es LocalDateTime, no String
             carrito.setFechaCreacion(LocalDateTime.now());
             carrito = carritoRepository.save(carrito);
         }
         return carrito;
     }
 
-    /**
-     * Agrega un tenis al carrito. Si ya existe en el carrito, solo aumenta la cantidad.
-     */
+    
     @Transactional
     public void agregarProducto(Carrito carrito, Long idTenis) {
-        Tenis tenis = tenisRepository.findById(idTenis)
-                .orElseThrow(() -> new IllegalArgumentException("Tenis no encontrado"));
+        agregarProducto(carrito, idTenis, 1);
+    }
 
-        // ¿Ya existe este tenis en el carrito?
+    @Transactional
+    public void agregarProducto(Carrito carrito, Long idTenis, int cantidad) {
+        if (carrito == null || carrito.getIdCarrito() == null) {
+            throw new IllegalArgumentException("El carrito no es válido.");
+        }
+
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor a cero.");
+        }
+
+        Tenis tenis = tenisRepository.findById(idTenis)
+                .orElseThrow(() -> new IllegalArgumentException("Tenis no encontrado."));
+
+        Integer stock = tenis.getStock();
+        if (stock == null || stock <= 0) {
+            throw new IllegalStateException("Este producto no tiene stock disponible.");
+        }
+
         CarritoDetalle detalle = carritoDetalleRepository.findByCarritoAndTenis(carrito, tenis);
+
+        int cantidadActual = (detalle != null && detalle.getCantidad() != null)
+                ? detalle.getCantidad()
+                : 0;
+
+        int nuevaCantidad = cantidadActual + cantidad;
+
+        if (nuevaCantidad > stock) {
+            throw new IllegalStateException(
+                    "No hay suficiente stock disponible. Stock actual: " + stock
+            );
+        }
 
         if (detalle == null) {
             detalle = new CarritoDetalle();
             detalle.setCarrito(carrito);
             detalle.setTenis(tenis);
-            detalle.setCantidad(1);
-            // usamos precioUnitario
+            detalle.setCantidad(nuevaCantidad);
             detalle.setPrecioUnitario(tenis.getPrecio());
-            // si quieres, puedes calcular el subtotal aquí también:
-            detalle.setSubtotal(tenis.getPrecio());
         } else {
-            detalle.setCantidad(detalle.getCantidad() + 1);
-            // actualizar subtotal
-            detalle.setSubtotal(detalle.getCantidad() * detalle.getPrecioUnitario());
+            detalle.setCantidad(nuevaCantidad);
         }
+
+        detalle.setSubtotal(detalle.getCantidad() * detalle.getPrecioUnitario());
 
         carritoDetalleRepository.save(detalle);
     }
 
-    /**
-     * Devuelve el carrito ABIERTO del cliente (o null si no tiene).
-     */
     @Transactional(readOnly = true)
     public Carrito obtenerCarritoDeCliente(Cliente cliente) {
+        if (cliente == null || cliente.getIdCliente() == null) {
+            return null;
+        }
         return carritoRepository.findByClienteAndEstado(cliente, "ABIERTO");
     }
 
-    /**
-     * Calcula el total del carrito del cliente (sumatoria de cantidad * precioUnitario).
-     */
     @Transactional(readOnly = true)
     public double calcularTotal(Cliente cliente) {
         Carrito carrito = obtenerCarritoDeCliente(cliente);
@@ -98,9 +119,6 @@ public class CarritoService {
                 .sum();
     }
 
-    /**
-     * Elimina una línea del carrito (detalle) del cliente.
-     */
     @Transactional
     public void eliminarProducto(Cliente cliente, Long idDetalle) {
         Carrito carrito = obtenerCarritoDeCliente(cliente);
@@ -116,11 +134,11 @@ public class CarritoService {
         });
     }
 
-    /**
-     * Lista los detalles de un carrito.
-     */
     @Transactional(readOnly = true)
     public List<CarritoDetalle> getDetalles(Carrito carrito) {
+        if (carrito == null || carrito.getIdCarrito() == null) {
+            throw new IllegalArgumentException("El carrito no es válido.");
+        }
         return carritoDetalleRepository.findByCarrito(carrito);
     }
 }

@@ -24,7 +24,6 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    // Compatibilidad con código viejo
     public boolean registrar(Cliente cliente) {
         guardar(cliente);
         return true;
@@ -42,7 +41,6 @@ public class ClienteService {
         return clienteRepository.findById(id).orElse(null);
     }
 
-    // 👇 Nuevo método para validar correos duplicados
     public boolean existeEmail(String email) {
         if (email == null || email.isBlank()) {
             return false;

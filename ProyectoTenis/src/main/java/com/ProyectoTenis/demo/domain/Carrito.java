@@ -1,8 +1,6 @@
 package com.ProyectoTenis.demo.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,7 +16,6 @@ public class Carrito implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_cliente", nullable = false)
-    @NotNull(message = "El carrito debe pertenecer a un cliente")
     private Cliente cliente;
 
     @Column(name = "fecha_creacion")
@@ -27,12 +24,10 @@ public class Carrito implements Serializable {
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CarritoDetalle> detalles = new ArrayList<>();
 
-    @Positive(message = "El total debe ser mayor a 0")
     private Double total;
 
-    // 👇 NUEVO CAMPO: debe existir porque está en la BD y lo usa el servicio
-    @Column(name = "estado")
-    private String estado; // "ABIERTO" o "PAGADO"
+    @Column(name = "estado", nullable = false)
+    private String estado = "ABIERTO"; // Valor por defecto
 
     public Carrito() {
     }
@@ -77,7 +72,6 @@ public class Carrito implements Serializable {
         this.total = total;
     }
 
-    // 👇 GETTER y SETTER que te pedía el compilador
     public String getEstado() {
         return estado;
     }
@@ -86,4 +80,3 @@ public class Carrito implements Serializable {
         this.estado = estado;
     }
 }
-

@@ -7,12 +7,13 @@
 </head>
 <body>
 
-<!-- 🔹 HEADER SIMPLE (sin lógica de sesión por ahora) -->
+<!-- HEADER -->
 <header style="width:90%; margin:auto; padding-top:15px; display:flex; justify-content:space-between; align-items:center;">
     <div style="font-weight:bold; color:var(--turquesa); font-size:20px;">
         Tienda de Tenis
     </div>
     <nav style="display:flex; gap:15px;">
+        <!-- 👈 aquí sin espacio -->
         <a th:href="@{/}" style="text-decoration:none; color:var(--gris);">Inicio</a>
         <a th:href="@{/carrito}" style="text-decoration:none; color:var(--gris);">Ver carrito</a>
         <a th:href="@{/login}" style="text-decoration:none; color:var(--rosado); font-weight:bold;">
@@ -35,13 +36,16 @@
     <!-- FILTROS -->
     <div class="filtros">
         <form th:action="@{/}" method="get">
-            <input type="text" name="buscar" th:value="${buscar}" placeholder="Buscar por nombre...">
-            
+            <input type="text"
+                   name="buscar"
+                   th:value="${buscar}"
+                   placeholder="Buscar por nombre...">
+
             <select name="categoria">
                 <option value="">Todas las categorías</option>
                 <option th:each="c : ${categorias}"
                         th:value="${c.idCategoria}"
-                        th:selected="${idCategoria != null and idCategoria == c.idCategoria}"
+                        th:selected="${idCategoria != null && idCategoria == c.idCategoria}"
                         th:text="${c.nombre}">
                 </option>
             </select>
@@ -58,26 +62,30 @@
 
         <!-- Lista de tenis -->
         <div class="card" th:each="t : ${tenisList}">
-            
+
             <a th:href="@{/detalle/{id}(id=${t.idTenis})}">
                 <img th:src="${t.imagen}" alt="Imagen del tenis">
             </a>
 
-            <h3 th:text="${t.nombre}"></h3>
+            <h3 th:text="${t.nombre}">Nombre tenis</h3>
 
-            <p><strong>₡</strong> <span th:text="${t.precio}"></span></p>
+            <p><strong>₡</strong> <span th:text="${t.precio}">0.0</span></p>
 
-            <p th:text="'Marca: ' + ${t.marca}"></p>
+            <p th:text="'Marca: ' + ${t.marca}">Marca</p>
 
-            <p th:if="${t.stock > 0}">
+            <!-- STOCK -->
+            <p th:if="${t.stock != null && t.stock > 0}">
                 Stock disponible: <span th:text="${t.stock}"></span>
             </p>
 
-            <p th:if="${t.stock <= 0}" class="sin-stock">Sin stock</p>
+            <p th:if="${t.stock == null || t.stock <= 0}" class="sin-stock">
+                Sin stock
+            </p>
 
-            <!-- BOTÓN COMPRAR -->
-            <form th:action="@{/agregar-carrito/{id}(id=${t.idTenis})}" method="post"
-                  th:if="${t.stock > 0}">
+            <!-- BOTÓN COMPRAR (solo si hay stock válido) -->
+            <form th:if="${t.stock != null && t.stock > 0}"
+                  th:action="@{/agregar-carrito/{id}(id=${t.idTenis})}"
+                  method="post">
                 <input type="hidden" name="cantidad" value="1">
                 <button type="submit" class="btn-comprar">Agregar al carrito</button>
             </form>

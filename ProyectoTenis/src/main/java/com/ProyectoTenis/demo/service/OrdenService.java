@@ -5,6 +5,7 @@ import com.ProyectoTenis.demo.repository.CarritoDetalleRepository;
 import com.ProyectoTenis.demo.repository.CarritoRepository;
 import com.ProyectoTenis.demo.repository.OrdenDetalleRepository;
 import com.ProyectoTenis.demo.repository.OrdenRepository;
+import com.ProyectoTenis.demo.repository.TenisRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,24 +20,23 @@ public class OrdenService {
     private final OrdenDetalleRepository ordenDetalleRepository;
     private final CarritoRepository carritoRepository;
     private final CarritoDetalleRepository carritoDetalleRepository;
+    private final TenisRepository tenisRepository;
 
     public OrdenService(OrdenRepository ordenRepository,
                         OrdenDetalleRepository ordenDetalleRepository,
                         CarritoRepository carritoRepository,
-                        CarritoDetalleRepository carritoDetalleRepository) {
+                        CarritoDetalleRepository carritoDetalleRepository,
+                        TenisRepository tenisRepository) {
         this.ordenRepository = ordenRepository;
         this.ordenDetalleRepository = ordenDetalleRepository;
         this.carritoRepository = carritoRepository;
         this.carritoDetalleRepository = carritoDetalleRepository;
+        this.tenisRepository = tenisRepository;
     }
 
-    /**
-     * Crea una orden (factura) a partir del carrito:
-     * - Calcula total
-     * - Crea Orden y OrdenDetalle
-     * - Marca el carrito como PAGADO
-     * - Vacía el carrito
-     */
+   
+     //Crea una factura a partir del carrito:
+     
     @Transactional
     public Orden procesarCompra(Carrito carrito) {
 
@@ -51,14 +51,14 @@ public class OrdenService {
         Orden orden = new Orden();
         orden.setCliente(carrito.getCliente());
         orden.setFechaCreacion(LocalDateTime.now());
-        orden.setEstado("PAGADA"); // o "PENDIENTE" si quieres otro flujo
+        orden.setEstado("PAGADA");
 
-        // Opcional: usar dirección del cliente como dirección de envío
+        // Dirección de envío (si el cliente la tiene)
         if (carrito.getCliente().getDireccion() != null) {
             orden.setDireccionEnvio(carrito.getCliente().getDireccion());
         }
 
-        // Opcional: fecha estimada de entrega en 3 días
+        // Fecha estimada de entrega opcional (3 días después)
         orden.setFechaEstimadaEntrega(LocalDate.now().plusDays(3));
 
         orden = ordenRepository.save(orden);
@@ -67,9 +67,21 @@ public class OrdenService {
 
         // Crear los detalles de la orden a partir de los del carrito
         for (CarritoDetalle d : detalles) {
+
+            Tenis tenis = d.getTenis();
+
+            // Validar stock: si es null o insuficiente -> error
+            Integer stockActual = tenis.getStock();
+            if (stockActual == null || stockActual < d.getCantidad()) {
+                throw new IllegalStateException(
+                        "No hay stock suficiente para el producto: " + tenis.getNombre()
+                );
+            }
+
+            // Crear detalle de orden
             OrdenDetalle od = new OrdenDetalle();
             od.setOrden(orden);
-            od.setTenis(d.getTenis());
+            od.setTenis(tenis);
             od.setCantidad(d.getCantidad());
             od.setPrecioUnitario(d.getPrecioUnitario());
 
@@ -79,25 +91,24 @@ public class OrdenService {
             total += subtotal;
 
             ordenDetalleRepository.save(od);
+
+            // Rebajar stock del tenis
+            tenis.setStock(stockActual - d.getCantidad());
+            tenisRepository.save(tenis);
         }
 
         // Setear total final en la orden
         orden.setTotal(total);
         ordenRepository.save(orden);
 
-        // Marcar carrito como pagado (si tu entidad Carrito tiene este campo)
+        // Marcar carrito como pagado y guardar total
         try {
             carrito.setEstado("PAGADO");
-        } catch (Exception ignored) {
-            // Si tu Carrito no tiene 'estado', puedes borrar este bloque
-        }
+        } catch (Exception ignored) { }
 
-        // Guardar total del carrito si tienes ese campo
         try {
             carrito.setTotal(total);
-        } catch (Exception ignored) {
-            // Si tu Carrito no tiene 'total', no pasa nada
-        }
+        } catch (Exception ignored) { }
 
         carritoRepository.save(carrito);
 
@@ -107,13 +118,13 @@ public class OrdenService {
         return orden;
     }
 
-    /** Listar órdenes de un cliente (por si luego quieres historial de compras) */
+    //Listar órdenes de un cliente (por si luego quieres historial de compras) */
     @Transactional(readOnly = true)
     public List<Orden> listarPorCliente(Cliente cliente) {
         return ordenRepository.findByCliente(cliente);
     }
 
-    /** Buscar una orden por id (para ver detalle de factura) */
+    // Buscar una orden por id (para ver detalle de factura) */
     @Transactional(readOnly = true)
     public Orden buscarPorId(Long id) {
         return ordenRepository.findById(id).orElse(null);
