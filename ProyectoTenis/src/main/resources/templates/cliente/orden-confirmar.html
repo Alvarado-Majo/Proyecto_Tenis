@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmar orden</title>
+</head>
+<body>
+
+<h2>Confirmar compra</h2>
+
+<p>Total a pagar: ₡<span th:text="${total}"></span></p>
+
+<form th:action="@{/orden/confirmar}" method="post">
+
+    <input type="radio" name="metodoPago" value="SINPE" required> SINPE<br>
+    <input type="radio" name="metodoPago" value="TARJETA"> Tarjeta<br>
+    <input type="radio" name="metodoPago" value="EFECTIVO"> Efectivo<br>
+
+    <button type="submit">Confirmar compra</button>
+</form>
+
+
+</body>
+</html>
+

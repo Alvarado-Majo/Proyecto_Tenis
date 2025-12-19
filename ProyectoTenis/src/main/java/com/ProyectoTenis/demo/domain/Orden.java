@@ -13,6 +13,10 @@ import java.util.List;
 @Table(name = "orden")
 public class Orden implements Serializable {
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metodo_pago", nullable = false)
+    private MetodoPago metodoPago;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idOrden;
@@ -104,4 +108,14 @@ public class Orden implements Serializable {
     public void setDetalles(List<OrdenDetalle> detalles) {
         this.detalles = detalles;
     }
+
+    public MetodoPago getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(MetodoPago metodoPago) {
+        this.metodoPago = metodoPago;
+    }
+    
+    
 }

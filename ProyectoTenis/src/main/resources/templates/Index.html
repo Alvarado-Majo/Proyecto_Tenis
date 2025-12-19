@@ -12,17 +12,38 @@
     <div style="font-weight:bold; color:var(--turquesa); font-size:20px;">
         Tienda de Tenis
     </div>
-    <nav style="display:flex; gap:15px;">
-        <!-- 👈 aquí sin espacio -->
-        <a th:href="@{/}" style="text-decoration:none; color:var(--gris);">Inicio</a>
-        <a th:href="@{/carrito}" style="text-decoration:none; color:var(--gris);">Ver carrito</a>
-        <a th:href="@{/login}" style="text-decoration:none; color:var(--rosado); font-weight:bold;">
+    <nav style="display:flex; gap:15px; align-items:center;">
+    <a th:href="@{/}" style="text-decoration:none; color:var(--gris);">Inicio</a>
+    <a th:href="@{/carrito}" style="text-decoration:none; color:var(--gris);">Ver carrito</a>
+
+    <!-- SI NO hay cliente logueado -->
+    <div th:if="${session.clienteLogueado == null}" style="display:flex; gap:15px;">
+        <a th:href="@{/login}"
+           style="text-decoration:none; color:var(--rosado); font-weight:bold;">
             Iniciar sesión
         </a>
-        <a th:href="@{/registro}" style="text-decoration:none; color:var(--turquesa); font-weight:bold;">
+        <a th:href="@{/registro}"
+           style="text-decoration:none; color:var(--turquesa); font-weight:bold;">
             Registrarse
         </a>
-    </nav>
+    </div>
+
+    <!-- SI hay cliente logueado -->
+    <div th:if="${session.clienteLogueado != null}"
+         style="display:flex; gap:10px; align-items:center;">
+
+        <span style="color:var(--gris);">
+            Hola,
+            <strong th:text="${session.clienteLogueado.nombre}">Cliente</strong>
+        </span>
+
+        <a th:href="@{/logout-cliente}"
+           style="text-decoration:none; color:red; font-weight:bold;">
+            Cerrar sesión
+        </a>
+    </div>
+</nav>
+
 </header>
 
 <div class="contenedor">
